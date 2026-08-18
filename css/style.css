@@ -1,0 +1,165 @@
+/* =========================================================
+   PEDRA, PAPEL E TESOURA
+   TESTE DE ASSETS — COMPOSIÇÃO TRIANGULAR
+========================================================= */
+
+/* ==========================
+   RESET
+========================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+
+  background: #080b0d;
+  color: #f5f5f5;
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==========================
+   ÁREA DE TESTE
+========================== */
+
+.asset-test {
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  padding: 2rem;
+}
+
+/* ==========================
+   GRUPO DE ASSETS
+========================== */
+
+.asset-group {
+  width: min(100%, 760px);
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "rock paper"
+    "scissors scissors";
+
+  justify-items: center;
+  align-items: end;
+
+  column-gap: clamp(2rem, 8vw, 5rem);
+  row-gap: clamp(2rem, 5vw, 3rem);
+}
+
+/* ==========================
+   POSIÇÃO DOS ITENS
+========================== */
+
+.asset-card:nth-child(1) {
+  grid-area: rock;
+}
+
+.asset-card:nth-child(2) {
+  grid-area: paper;
+}
+
+.asset-card:nth-child(3) {
+  grid-area: scissors;
+}
+
+/* ==========================
+   ITEM
+========================== */
+
+.asset-card {
+  display: grid;
+  justify-items: center;
+
+  gap: 1.25rem;
+}
+
+/* ==========================
+   ASSETS
+========================== */
+
+.game-asset {
+  display: block;
+
+  width: min(100%, 300px);
+  height: auto;
+
+  object-fit: contain;
+
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ==========================
+   LEGENDA
+========================== */
+
+.asset-card figcaption {
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ==========================
+   TABLET
+========================== */
+
+@media (max-width: 820px) {
+  .asset-group {
+    width: min(100%, 620px);
+
+    column-gap: 2rem;
+    row-gap: 2rem;
+  }
+
+  .game-asset {
+    width: min(100%, 220px);
+  }
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media (max-width: 560px) {
+  .asset-test {
+    padding: 1.5rem;
+  }
+
+  .asset-group {
+    width: 100%;
+
+    column-gap: 1rem;
+    row-gap: 1.5rem;
+  }
+
+  .game-asset {
+    width: min(100%, 140px);
+  }
+
+  .asset-card {
+    gap: 0.9rem;
+  }
+
+  .asset-card figcaption {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+  }
+}
