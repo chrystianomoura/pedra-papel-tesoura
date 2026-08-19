@@ -3,6 +3,18 @@
 /* =========================================================
    PEDRA, PAPEL E TESOURA
    INTERFACE DA PARTIDA
+   ---------------------------------------------------------
+   Responsabilidades deste módulo:
+
+   • localizar e exportar elementos importantes do DOM;
+   • atualizar textos e estados visuais da interface;
+   • controlar acessibilidade dos elementos interativos;
+   • atualizar rodada e placar;
+   • restaurar a interface entre as rodadas;
+   • limpar animações e estados temporários.
+
+   Este arquivo não decide quem vence uma partida.
+   As regras pertencem ao game.js.
 ========================================================= */
 
 import {
@@ -17,6 +29,15 @@ import {
 /* ==========================
    ELEMENTOS DO DOM
 ========================== */
+
+/*
+  As referências são obtidas uma única vez durante
+  a inicialização do módulo.
+
+  Como esses elementos permanecem no documento durante
+  toda a aplicação, não existe necessidade de executar
+  querySelector() novamente a cada atualização.
+*/
 
 export const elementos = document.querySelector("#elementos");
 
@@ -50,9 +71,109 @@ export const botaoJogarNovamente = document.querySelector("#jogar-novamente");
    CAMADA DE ANIMAÇÃO
 ========================== */
 
+/*
+  Esta camada é permanente.
+
+  animations.js apenas altera sua imagem,
+  posição e visibilidade durante os movimentos.
+*/
+
 export const elementoAnimado = document.querySelector("#elemento-animado");
 
 export const imagemAnimada = document.querySelector("#imagem-animada");
+
+/* ==========================
+   VALIDAÇÃO DO DOM
+========================== */
+
+/*
+  Como o JavaScript depende diretamente desses elementos,
+  é melhor falhar imediatamente durante o desenvolvimento
+  caso algum ID seja removido ou renomeado no HTML.
+
+  Sem essa verificação, o erro poderia aparecer muito
+  depois como um "Cannot read properties of null".
+*/
+
+const elementosObrigatorios = [
+  elementos,
+  campoVisual,
+  mensagemJogo,
+  rodadaElemento,
+  duelo,
+  slotJogador,
+  slotCpu,
+  elementoCpu,
+  imagemCpu,
+  resultadoConfronto,
+  placarPontos,
+  botaoJogarNovamente,
+  elementoAnimado,
+  imagemAnimada,
+];
+
+if (elementosObrigatorios.some((elemento) => !elemento)) {
+  throw new Error(
+    "A interface não pôde ser inicializada: existem elementos obrigatórios ausentes no HTML.",
+  );
+}
+
+/*
+  O número de botões deve continuar acompanhando
+  exatamente as jogadas registradas em game.js.
+*/
+
+if (botoesJogada.length !== JOGADAS.length) {
+  throw new Error(
+    "A quantidade de botões de jogada não corresponde às jogadas definidas em game.js.",
+  );
+}
+
+/* ==========================
+   MOVIMENTO REDUZIDO
+========================== */
+
+/*
+  Animações criadas pela Web Animations API não são
+  automaticamente afetadas pelo media query do CSS.
+
+  Por isso verificamos a preferência também no JavaScript.
+*/
+
+function prefereMovimentoReduzido() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/* ==========================
+   UTILITÁRIOS DE ANIMAÇÃO
+========================== */
+
+/*
+  Cancela animações iniciadas pela Web Animations API
+  em determinado elemento.
+
+  Centralizar essa operação evita repetir o mesmo
+  getAnimations().forEach() em vários pontos.
+*/
+
+function cancelarAnimacoes(elemento) {
+  elemento.getAnimations().forEach((animacao) => {
+    animacao.cancel();
+  });
+}
+
+/* ==========================
+   ESTADO INICIAL DO BOTÃO
+========================== */
+
+/*
+  O botão começa visualmente indisponível.
+
+  disabled garante que ele também fique fora da
+  navegação por teclado enquanto estiver oculto.
+*/
+
+botaoJogarNovamente.disabled = true;
 
 /* ==========================
    ESTADOS DA MENSAGEM
@@ -70,6 +191,8 @@ function aplicarEstadoMensagem(estado) {
 
   if (estado === "analisando") {
     mensagemJogo.classList.add("mensagem-jogo--analisando");
+
+    return;
   }
 
   if (estado === "duelo") {
@@ -89,6 +212,16 @@ export async function atualizarMensagem(
 
   await esperar(TEMPOS.TROCA_MENSAGEM);
 
+  /*
+    textContent é utilizado deliberadamente.
+
+    Diferentemente de innerHTML, ele trata todo conteúdo
+    recebido apenas como texto e não interpreta marcação HTML.
+
+    Isso também elimina uma possível superfície de XSS caso
+    algum texto futuramente deixe de ser totalmente estático.
+  */
+
   mensagemJogo.textContent = texto;
 
   aplicarEstadoMensagem(estado);
@@ -99,6 +232,15 @@ export async function atualizarMensagem(
     "mensagem-jogo--saindo",
     "mensagem-jogo--entrando",
   );
+
+  /*
+    A leitura de offsetWidth força o navegador a consolidar
+    o estado anterior antes de adicionarmos novamente a
+    classe de entrada.
+
+    Isso permite reiniciar a animação CSS de maneira
+    previsível mesmo usando a mesma classe repetidamente.
+  */
 
   void mensagemJogo.offsetWidth;
 
@@ -114,9 +256,19 @@ export async function atualizarMensagem(
 ========================== */
 
 export async function mostrarMensagemConfronto(texto) {
+  /*
+    Novamente utilizamos textContent para que a mensagem
+    nunca seja interpretada como HTML.
+  */
+
   resultadoConfronto.textContent = texto;
 
   resultadoConfronto.setAttribute("aria-hidden", "false");
+
+  /*
+    Esperamos o navegador registrar primeiro o conteúdo
+    antes de iniciar a transição visual.
+  */
 
   await proximoFrame();
 
@@ -142,6 +294,13 @@ export function atualizarRodada() {
 
   rodadaElemento.classList.remove("rodada--atualizada");
 
+  /*
+    Força o navegador a registrar a remoção da classe
+    antes que ela seja adicionada novamente.
+
+    Sem isso, a mesma animação pode não reiniciar.
+  */
+
   void rodadaElemento.offsetWidth;
 
   rodadaElemento.classList.add("rodada--atualizada");
@@ -153,6 +312,11 @@ export function atualizarRodada() {
 
 export function bloquearEscolhas() {
   botoesJogada.forEach((botao) => {
+    /*
+        disabled bloqueia mouse, toque e teclado de maneira
+        nativa, sendo preferível a depender apenas de CSS.
+      */
+
     botao.disabled = true;
   });
 }
@@ -169,6 +333,19 @@ export function liberarEscolhas() {
 
 export function atualizarPlacar() {
   placarPontos.textContent = `${estadoJogo.pontosJogador} : ${estadoJogo.pontosCpu}`;
+
+  /*
+    O placar continua sendo atualizado normalmente quando
+    movimento reduzido estiver ativo.
+
+    Apenas a animação decorativa é ignorada.
+  */
+
+  if (prefereMovimentoReduzido()) {
+    return;
+  }
+
+  cancelarAnimacoes(placarPontos);
 
   placarPontos.animate(
     [
@@ -196,10 +373,24 @@ export function atualizarPlacar() {
 export function mostrarBotaoNovaRodada() {
   botaoJogarNovamente.classList.add("jogar-novamente--visivel");
 
+  /*
+    Primeiro tornamos o botão disponível para interação
+    e depois o expomos à árvore de acessibilidade.
+  */
+
+  botaoJogarNovamente.disabled = false;
+
   botaoJogarNovamente.setAttribute("aria-hidden", "false");
 }
 
 export function esconderBotaoNovaRodada() {
+  /*
+    disabled impede imediatamente que o botão receba
+    foco ou seja ativado enquanto desaparece visualmente.
+  */
+
+  botaoJogarNovamente.disabled = true;
+
   botaoJogarNovamente.classList.remove("jogar-novamente--visivel");
 
   botaoJogarNovamente.setAttribute("aria-hidden", "true");
@@ -210,8 +401,26 @@ export function esconderBotaoNovaRodada() {
 ========================== */
 
 export function restaurarElementosIniciais() {
+  /*
+    Durante o duelo, o botão escolhido pelo jogador é
+    fisicamente movido para slotJogador.
+
+    Aqui reconstruímos a ordem original da seleção usando
+    JOGADAS como fonte oficial da sequência.
+  */
+
   JOGADAS.forEach((jogada) => {
     const botao = botoesJogada.find((item) => item.dataset.jogada === jogada);
+
+    /*
+      Esta condição indicaria inconsistência entre
+      game.js e o HTML, portanto falhamos explicitamente
+      em vez de executar append(undefined).
+    */
+
+    if (!botao) {
+      throw new Error(`Botão da jogada "${jogada}" não encontrado.`);
+    }
 
     elementos.append(botao);
   });
@@ -219,13 +428,18 @@ export function restaurarElementosIniciais() {
   botoesJogada.forEach((botao) => {
     botao.classList.remove("elemento--selecionado", "elemento--saindo");
 
+    /*
+        Removemos somente os estilos inline temporários
+        aplicados durante a animação.
+
+        Os estilos permanentes continuam definidos no CSS.
+      */
+
     botao.style.visibility = "";
     botao.style.pointerEvents = "";
     botao.style.transform = "";
 
-    botao.getAnimations().forEach((animacao) => {
-      animacao.cancel();
-    });
+    cancelarAnimacoes(botao);
   });
 
   elementos.hidden = false;
@@ -236,9 +450,7 @@ export function restaurarElementosIniciais() {
 ========================== */
 
 function reiniciarCamadaMovimento() {
-  elementoAnimado.getAnimations().forEach((animacao) => {
-    animacao.cancel();
-  });
+  cancelarAnimacoes(elementoAnimado);
 
   elementoAnimado.classList.remove(
     "elemento-animado--visivel",
@@ -251,21 +463,22 @@ function reiniciarCamadaMovimento() {
   elementoAnimado.style.height = "";
   elementoAnimado.style.transform = "";
 
-  imagemAnimada.src = "";
+  /*
+    A imagem da camada só possui src enquanto estiver sendo
+    utilizada.
+
+    removeAttribute() representa melhor esse estado do que
+    definir src="".
+  */
+
+  imagemAnimada.removeAttribute("src");
 }
 
 /* ==========================
-   RESET DO DUELO
+   RESET DOS SLOTS
 ========================== */
 
-export function reiniciarDuelo() {
-  esconderBotaoNovaRodada();
-  esconderMensagemConfronto();
-
-  limparEstadosMensagem();
-
-  reiniciarCamadaMovimento();
-
+function reiniciarSlotsDuelo() {
   slotJogador.classList.remove(
     "slot-duelo--oculto",
     "slot-duelo--vencedor",
@@ -278,26 +491,58 @@ export function reiniciarDuelo() {
     "slot-duelo--perdedor",
   );
 
-  duelo.classList.remove("duelo--pulo", "duelo--empate");
+  cancelarAnimacoes(slotJogador);
 
-  slotJogador.getAnimations().forEach((animacao) => {
-    animacao.cancel();
-  });
+  cancelarAnimacoes(slotCpu);
+}
 
-  slotCpu.getAnimations().forEach((animacao) => {
-    animacao.cancel();
-  });
+/* ==========================
+   RESET DA CPU
+========================== */
 
-  elementoCpu.getAnimations().forEach((animacao) => {
-    animacao.cancel();
-  });
+function reiniciarCpu() {
+  cancelarAnimacoes(elementoCpu);
 
   elementoCpu.classList.remove("elemento-cpu--visivel");
 
   elementoCpu.setAttribute("aria-hidden", "true");
 
-  imagemCpu.src = "";
+  /*
+    A imagem da CPU será definida novamente somente
+    quando sua nova jogada for sorteada.
+  */
+
+  imagemCpu.removeAttribute("src");
+
   imagemCpu.alt = "";
+}
+
+/* ==========================
+   RESET DO DUELO
+========================== */
+
+export function reiniciarDuelo() {
+  /*
+    A limpeza é dividida por responsabilidade para evitar
+    que esta função vire um bloco grande de operações
+    sem relação clara entre si.
+  */
+
+  esconderBotaoNovaRodada();
+  esconderMensagemConfronto();
+
+  limparEstadosMensagem();
+
+  reiniciarCamadaMovimento();
+  reiniciarSlotsDuelo();
+  reiniciarCpu();
+
+  duelo.classList.remove("duelo--pulo", "duelo--empate");
+
+  /*
+    hidden remove o duelo tanto da renderização visual
+    quanto da árvore de acessibilidade.
+  */
 
   duelo.hidden = true;
 

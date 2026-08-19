@@ -1,13 +1,55 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <!-- ==========================
+         METADADOS BÁSICOS
+    =========================== -->
+
     <meta charset="UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Mantém a interface na escala planejada e evita zoom
+      acidental durante os toques rápidos da partida.
+
+      Essa decisão é específica desta interface de jogo:
+      em páginas orientadas à leitura, bloquear o zoom pode
+      prejudicar a acessibilidade e normalmente deve ser evitado.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <!--
+      Evita o envio desnecessário da URL completa desta
+      página como referência ao acessar recursos externos.
+    -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!--
+      Informa ao navegador a cor predominante da interface.
+      Também pode ser utilizada pela interface do navegador mobile.
+    -->
+    <meta name="theme-color" content="#080b0d" />
+
+    <meta
+      name="description"
+      content="Jogo de Pedra, Papel e Tesoura desenvolvido com HTML, CSS e JavaScript puro."
+    />
 
     <title>Pedra, Papel e Tesoura</title>
 
+    <!-- ==========================
+         TIPOGRAFIA
+    =========================== -->
+
+    <!--
+      O preconnect antecipa a conexão com os servidores
+      utilizados pelo Google Fonts e reduz a latência
+      necessária para carregar a tipografia.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <link
@@ -15,8 +57,21 @@
       rel="stylesheet"
     />
 
+    <!-- ==========================
+         ESTILOS
+    =========================== -->
+
     <link rel="stylesheet" href="css/style.css" />
 
+    <!-- ==========================
+         JAVASCRIPT
+    =========================== -->
+
+    <!--
+      type="module" permite utilizar import/export entre
+      os módulos JavaScript e já possui comportamento defer:
+      o script é executado somente após o HTML ser analisado.
+    -->
     <script type="module" src="js/main.js"></script>
   </head>
 
@@ -42,10 +97,27 @@
       =========================== -->
 
       <div class="area-mensagem">
-        <p class="mensagem-jogo" id="mensagem-jogo" aria-live="polite">
+        <!--
+          aria-live permite que mudanças importantes de estado
+          sejam anunciadas por tecnologias assistivas sem
+          interromper agressivamente a navegação do usuário.
+
+          aria-atomic faz a mensagem inteira ser anunciada
+          quando seu conteúdo é atualizado.
+        -->
+        <p
+          class="mensagem-jogo"
+          id="mensagem-jogo"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           Escolha sua jogada:
         </p>
 
+        <!--
+          Elemento puramente decorativo.
+          aria-hidden evita ruído para leitores de tela.
+        -->
         <div class="separador" aria-hidden="true">
           <span class="losango"></span>
         </div>
@@ -61,10 +133,15 @@
                SELEÇÃO INICIAL
           =========================== -->
 
+          <!--
+            role="group" deixa explícito que os três botões
+            fazem parte do mesmo conjunto de escolhas.
+          -->
           <div
             class="elementos"
             id="elementos"
-            aria-label="Escolha Pedra, Papel ou Tesoura"
+            role="group"
+            aria-label="Escolha entre Pedra, Papel ou Tesoura"
           >
             <button
               class="elemento elemento--pedra"
@@ -72,7 +149,16 @@
               data-jogada="pedra"
               aria-label="Escolher Pedra"
             >
-              <img class="imagem-elemento" src="assets/pedra.png" alt="" />
+              <!--
+                A imagem é decorativa dentro do botão porque
+                o próprio botão já possui um nome acessível.
+              -->
+              <img
+                class="imagem-elemento"
+                src="assets/pedra.png"
+                alt=""
+                draggable="false"
+              />
             </button>
 
             <button
@@ -81,7 +167,12 @@
               data-jogada="papel"
               aria-label="Escolher Papel"
             >
-              <img class="imagem-elemento" src="assets/papel.png" alt="" />
+              <img
+                class="imagem-elemento"
+                src="assets/papel.png"
+                alt=""
+                draggable="false"
+              />
             </button>
 
             <button
@@ -90,7 +181,12 @@
               data-jogada="tesoura"
               aria-label="Escolher Tesoura"
             >
-              <img class="imagem-elemento" src="assets/tesoura.png" alt="" />
+              <img
+                class="imagem-elemento"
+                src="assets/tesoura.png"
+                alt=""
+                draggable="false"
+              />
             </button>
           </div>
 
@@ -98,6 +194,11 @@
                DUELO / RESULTADO
           =========================== -->
 
+          <!--
+            O atributo hidden mantém toda a área fora da
+            renderização e da árvore de acessibilidade
+            enquanto nenhum duelo estiver acontecendo.
+          -->
           <div class="duelo" id="duelo" hidden>
             <div class="area-confronto">
               <p
@@ -107,20 +208,41 @@
               ></p>
             </div>
 
+            <!--
+              O botão escolhido pelo usuário é movido para
+              este slot pelo JavaScript durante o duelo.
+            -->
             <div class="slot-duelo slot-duelo--jogador" id="slot-jogador"></div>
 
+            <!--
+              A escolha da CPU reutiliza um único elemento.
+              Apenas sua imagem é atualizada a cada rodada.
+            -->
             <div class="slot-duelo slot-duelo--cpu" id="slot-cpu">
               <div class="elemento-cpu" id="elemento-cpu" aria-hidden="true">
-                <img class="imagem-elemento" id="imagem-cpu" src="" alt="" />
+                <img
+                  class="imagem-elemento"
+                  id="imagem-cpu"
+                  alt=""
+                  draggable="false"
+                />
               </div>
             </div>
 
             <div class="acao-duelo">
+              <!--
+                O botão começa indisponível tanto visualmente
+                quanto para teclado e tecnologias assistivas.
+
+                O JavaScript remove disabled e aria-hidden
+                quando a rodada termina.
+              -->
               <button
                 class="jogar-novamente"
                 id="jogar-novamente"
                 type="button"
                 aria-hidden="true"
+                disabled
               >
                 Jogar novamente
               </button>
@@ -136,7 +258,7 @@
       <footer class="placar" aria-label="Placar da partida">
         <span class="placar-jogador">Você</span>
 
-        <strong class="placar-pontos" id="placar-pontos"> 0 : 0 </strong>
+        <strong class="placar-pontos" id="placar-pontos">0 : 0</strong>
 
         <span class="placar-cpu">CPU</span>
       </footer>
@@ -146,13 +268,29 @@
          CAMADA DE ANIMAÇÃO
     =========================== -->
 
+    <!--
+      Esta camada é permanente e existe desde o carregamento.
+
+      Em vez de criar clones dos cards durante cada animação,
+      o JavaScript reutiliza este único elemento para:
+
+      1. mover a escolha do jogador até o duelo;
+      2. mover o vencedor até o centro;
+      3. executar sua celebração.
+
+      Isso reduz repaints e evita flashes observados
+      anteriormente em dispositivos móveis.
+
+      Como é uma representação exclusivamente visual,
+      toda a camada fica escondida de tecnologias assistivas.
+    -->
     <div class="camada-movimento" aria-hidden="true">
       <div class="elemento-animado" id="elemento-animado">
         <img
           class="imagem-elemento imagem-elemento--animada"
           id="imagem-animada"
-          src=""
           alt=""
+          draggable="false"
         />
       </div>
     </div>
