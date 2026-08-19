@@ -64,12 +64,6 @@ img {
 
   --tamanho-card: clamp(145px, min(47vw, 22.5dvh), 225px);
 
-  /*
-    Pedra e papel utilizam a ocupação padrão.
-
-    A tesoura possui uma silhueta naturalmente
-    mais longa e recebe uma ocupação própria.
-  */
   --ocupacao-elemento: 88%;
   --ocupacao-tesoura: 80%;
 
@@ -179,6 +173,7 @@ body {
 @keyframes rodada-atualizada {
   0% {
     opacity: 0.35;
+
     transform: scale(0.88);
   }
 
@@ -219,10 +214,6 @@ body {
 
   color: var(--cor-texto);
 
-  /*
-    Maior que antes para todos os estados:
-    escolha, análise, duelo e resultado.
-  */
   font-size: clamp(1.45rem, 6vw, 1.8rem);
   font-weight: 700;
 
@@ -232,9 +223,8 @@ body {
   text-transform: uppercase;
 
   transition:
-    color 300ms ease,
-    opacity 300ms ease,
-    transform 300ms ease;
+    color 220ms ease,
+    opacity 220ms ease;
 }
 
 /* ==========================
@@ -251,13 +241,6 @@ body {
    STATUS — CPU ANALISANDO
 ========================== */
 
-/*
-  O estado de análise permanece textual,
-  mas ganha movimento pelas reticências.
-
-  Não usamos spinner ou ícone genérico.
-*/
-
 .mensagem-jogo--analisando {
   color: var(--cor-texto);
 
@@ -265,7 +248,7 @@ body {
 }
 
 .mensagem-jogo--analisando::after {
-  content: "";
+  content: "...";
 
   display: inline-block;
 
@@ -273,40 +256,25 @@ body {
 
   margin-left: 0.08em;
 
-  text-align: left;
+  opacity: 0.35;
 
-  animation: cpu-analisando-pontos 1.1s steps(4, end) infinite;
+  animation: cpu-analisando-pontos 900ms ease-in-out infinite;
 }
 
 @keyframes cpu-analisando-pontos {
-  0% {
-    content: "";
-  }
-
-  25% {
-    content: ".";
+  0%,
+  100% {
+    opacity: 0.35;
   }
 
   50% {
-    content: "..";
-  }
-
-  75%,
-  100% {
-    content: "...";
+    opacity: 1;
   }
 }
 
 /* ==========================
    STATUS — DUELO
 ========================== */
-
-/*
-  "Duelo" ganha o dourado do sistema e uma linha
-  curta que abre abaixo do texto.
-
-  É um estado de transição, não um botão.
-*/
 
 .mensagem-jogo--duelo {
   color: var(--cor-dourada-clara);
@@ -320,57 +288,19 @@ body {
 
 .mensagem-jogo--saindo {
   opacity: 0;
-
-  transform: translateY(-8px);
 }
 
 .mensagem-jogo--entrando {
-  animation: mensagem-entrando 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: mensagem-entrando 220ms ease;
 }
 
 @keyframes mensagem-entrando {
   from {
     opacity: 0;
-
-    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-
-    transform: translateY(0);
-  }
-}
-
-/* ==========================
-   STATUS DE IMPACTO
-========================== */
-
-.mensagem-jogo--impacto {
-  animation: impacto-mensagem 650ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes impacto-mensagem {
-  0% {
-    opacity: 0;
-
-    transform: scale(0.74);
-  }
-
-  52% {
-    opacity: 1;
-
-    transform: scale(1.16);
-  }
-
-  75% {
-    transform: scale(0.96);
-  }
-
-  100% {
-    opacity: 1;
-
-    transform: scale(1);
   }
 }
 
@@ -479,6 +409,9 @@ body {
   border-radius: clamp(20px, 6vw, 28px);
 
   background: var(--cor-fundo-elemento);
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .elemento {
@@ -499,6 +432,9 @@ body {
 
   object-fit: contain;
 
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
   transition: transform 250ms ease;
 }
 
@@ -511,14 +447,16 @@ body {
    INTERAÇÃO
 ========================== */
 
-.elemento:hover,
-.elemento:focus-visible {
-  background: var(--cor-fundo-elemento-ativo);
-}
+@media (hover: hover) and (pointer: fine) {
+  .elemento:hover,
+  .elemento:focus-visible {
+    background: var(--cor-fundo-elemento-ativo);
+  }
 
-.elemento:hover .imagem-elemento,
-.elemento:focus-visible .imagem-elemento {
-  transform: scale(1.06);
+  .elemento:hover .imagem-elemento,
+  .elemento:focus-visible .imagem-elemento {
+    transform: scale(1.06);
+  }
 }
 
 .elemento:active .imagem-elemento {
@@ -558,6 +496,11 @@ body {
   pointer-events: none;
 
   transform-origin: center;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  will-change: transform;
 }
 
 .elemento-clone-movimento .imagem-elemento {
@@ -591,19 +534,9 @@ body {
 
   column-gap: clamp(0.7rem, 4vw, 1.25rem);
 
-  /*
-    O vencedor cresce e ainda pula até 24px.
-
-    Portanto existe espaço real entre a área
-    da explicação e a área dos cards.
-  */
   row-gap: clamp(2.1rem, 5.2vh, 3rem);
 
-  /*
-    Sobe o conjunto do resultado sem aproximar
-    o vencedor do placar.
-  */
-  transform: translateY(clamp(-30px, -3.5vh, -18px));
+  transform: translate3d(0, clamp(-30px, -3.5vh, -18px), 0);
 }
 
 /* ==========================
@@ -620,24 +553,10 @@ body {
   display: grid;
   place-items: center;
 
-  /*
-    A mensagem sobe independentemente dos cards.
-  */
-  transform: translateY(clamp(0px, 0.7vh, 8px));
-  /*
-    Segurança adicional contra o primeiro pulo,
-    que é o salto mais alto.
-  */
+  transform: translate3d(0, clamp(4px, 1vh, 10px), 0);
+
   margin-bottom: clamp(1.35rem, 3.4vh, 1.9rem);
 }
-
-/*
-  Resultado editorial.
-
-  Não possui fundo, moldura ou aparência
-  clicável. As linhas fazem a ligação visual
-  com o restante da interface.
-*/
 
 .resultado-confronto {
   width: 100%;
@@ -669,11 +588,7 @@ body {
   visibility: hidden;
   opacity: 0;
 
-  transform: translateY(8px);
-
-  transition:
-    opacity 450ms ease,
-    transform 450ms ease;
+  transition: opacity 220ms ease;
 }
 
 .resultado-confronto::before,
@@ -688,30 +603,6 @@ body {
 .resultado-confronto--visivel {
   visibility: visible;
   opacity: 1;
-
-  transform: translateY(0);
-
-  animation: entrada-confronto 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes entrada-confronto {
-  0% {
-    opacity: 0;
-
-    transform: translateY(8px);
-  }
-
-  60% {
-    opacity: 1;
-
-    transform: translateY(-2px);
-  }
-
-  100% {
-    opacity: 1;
-
-    transform: translateY(0);
-  }
 }
 
 /* ==========================
@@ -722,7 +613,10 @@ body {
   display: grid;
   place-items: center;
 
-  transform: none;
+  transform: translate3d(0, 0, 0);
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .slot-duelo--jogador {
@@ -746,7 +640,7 @@ body {
 
   pointer-events: none;
 
-  transform: none;
+  transform: translate3d(0, 0, 0);
 }
 
 .elemento--selecionado .imagem-elemento {
@@ -760,17 +654,22 @@ body {
 .elemento-cpu {
   opacity: 0;
 
-  transform: translateX(35px);
+  transform: translate3d(35px, 0, 0);
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  will-change: transform, opacity;
 
   transition:
-    opacity 850ms ease,
-    transform 1050ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .elemento-cpu--visivel {
   opacity: 1;
 
-  transform: translateX(0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* ==========================
@@ -779,24 +678,26 @@ body {
 
 .duelo--pulo .slot-duelo--jogador,
 .duelo--pulo .slot-duelo--cpu {
+  will-change: transform;
+
   animation: pulo-duelo 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes pulo-duelo {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
   40% {
-    transform: translateY(-22px);
+    transform: translate3d(0, -22px, 0);
   }
 
   65% {
-    transform: translateY(4px);
+    transform: translate3d(0, 4px, 0);
   }
 
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -806,32 +707,34 @@ body {
 
 .duelo--empate .slot-duelo--jogador,
 .duelo--empate .slot-duelo--cpu {
+  will-change: transform;
+
   animation: pulo-empate 1100ms ease;
 }
 
 @keyframes pulo-empate {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
   20% {
-    transform: translateY(-30px);
+    transform: translate3d(0, -30px, 0);
   }
 
   38% {
-    transform: translateY(3px);
+    transform: translate3d(0, 3px, 0);
   }
 
   58% {
-    transform: translateY(-20px);
+    transform: translate3d(0, -20px, 0);
   }
 
   76% {
-    transform: translateY(2px);
+    transform: translate3d(0, 2px, 0);
   }
 
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -841,10 +744,14 @@ body {
 
 .slot-duelo--vencedor {
   z-index: 5;
+
+  will-change: transform;
 }
 
 .slot-duelo--perdedor {
   pointer-events: none;
+
+  will-change: transform, opacity;
 }
 
 /* ==========================
@@ -853,46 +760,39 @@ body {
 
 .elemento--celebrando,
 .elemento-cpu--celebrando {
+  will-change: transform;
+
   animation: celebrar-vencedor 1.5s ease-out 1;
 }
 
 @keyframes celebrar-vencedor {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
-  /* Pulo 1 */
-
   12% {
-    transform: translateY(-24px);
+    transform: translate3d(0, -24px, 0);
   }
 
   24% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
-  /* Pulo 2 */
-
   42% {
-    transform: translateY(-18px);
+    transform: translate3d(0, -18px, 0);
   }
 
   54% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
-
-  /* Pulo 3 */
 
   70% {
-    transform: translateY(-12px);
+    transform: translate3d(0, -12px, 0);
   }
 
-  82% {
-    transform: translateY(0);
-  }
-
+  82%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -914,6 +814,8 @@ body {
 ========================== */
 
 .jogar-novamente {
+  position: relative;
+
   padding: clamp(0.7rem, 2vh, 0.95rem) clamp(1.25rem, 6vw, 1.8rem);
 
   border: 1px solid rgba(201, 148, 63, 0.55);
@@ -934,7 +836,7 @@ body {
   visibility: hidden;
   opacity: 0;
 
-  transform: translateY(10px) scale(0.96);
+  transform: translate3d(0, 10px, 0) scale(0.96);
 
   pointer-events: none;
 
@@ -950,35 +852,24 @@ body {
   visibility: visible;
   opacity: 1;
 
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
 
   pointer-events: auto;
-
-  animation: pulsar-acao 1.8s ease-in-out infinite;
 }
 
-.jogar-novamente:hover,
-.jogar-novamente:focus-visible {
-  border-color: var(--cor-dourada-clara);
+@media (hover: hover) and (pointer: fine) {
+  .jogar-novamente:hover,
+  .jogar-novamente:focus-visible {
+    border-color: var(--cor-dourada-clara);
 
-  background: rgba(201, 148, 63, 0.13);
-  color: var(--cor-dourada-clara);
+    background: rgba(201, 148, 63, 0.13);
+    color: var(--cor-dourada-clara);
+  }
 }
 
 .jogar-novamente:focus-visible {
   outline: 2px solid rgba(230, 187, 105, 0.4);
   outline-offset: 4px;
-}
-
-@keyframes pulsar-acao {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(201, 148, 63, 0);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgba(201, 148, 63, 0.2);
-  }
 }
 
 /* ==========================
@@ -1044,7 +935,7 @@ body {
   .duelo {
     row-gap: 1.15rem;
 
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 
   .area-confronto {
@@ -1052,7 +943,7 @@ body {
 
     margin-bottom: 0.75rem;
 
-    transform: translateY(-10px);
+    transform: translate3d(0, 4px, 0);
   }
 
   .resultado-confronto {

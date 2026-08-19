@@ -46,19 +46,10 @@ const MENSAGENS_CONFRONTO = {
    TEMPOS
 ========================== */
 
-/*
-  Todos os tempos da partida ficam centralizados
-  aqui para facilitar ajustes na cadência do jogo.
-*/
-
 export const TEMPOS = {
   SAIDA_OPCOES: 850,
   MOVIMENTO_JOGADOR: 1250,
 
-  /*
-    A CPU pensa por menos tempo e entra
-    rapidamente na arena.
-  */
   ANALISE_CPU: 900,
   ENTRADA_CPU: 700,
 
@@ -70,14 +61,14 @@ export const TEMPOS = {
   SAIDA_PERDEDOR: 650,
   MOVIMENTO_VENCEDOR: 950,
 
-  ENTRADA_CONFRONTO: 450,
+  ENTRADA_CONFRONTO: 220,
 
   CELEBRACAO_VENCEDOR: 1500,
 
   LEITURA_RESULTADO: 500,
 
-  TROCA_MENSAGEM: 300,
-  ENTRADA_MENSAGEM: 500,
+  TROCA_MENSAGEM: 220,
+  ENTRADA_MENSAGEM: 220,
 };
 
 /* ==========================

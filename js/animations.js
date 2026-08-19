@@ -48,13 +48,19 @@ export async function moverJogadorParaDuelo(botaoSelecionado) {
 
   const deslocamentoY = destino.top - origem.top;
 
+  /*
+    translate3d mantém o movimento na camada
+    de composição sempre que o navegador puder
+    promovê-lo para a GPU.
+  */
+
   const animacao = clone.animate(
     [
       {
-        transform: "translate(0, 0)",
+        transform: "translate3d(0, 0, 0)",
       },
       {
-        transform: `translate(${deslocamentoX}px, ${deslocamentoY}px)`,
+        transform: `translate3d(${deslocamentoX}px, ${deslocamentoY}px, 0)`,
       },
     ],
     {
@@ -118,15 +124,24 @@ export async function moverVencedorParaCentro(slotVencedor, slotPerdedor) {
 
   slotPerdedor.classList.add("slot-duelo--perdedor");
 
+  /*
+    Apenas transform e opacity são animados.
+
+    Nenhuma propriedade de layout, como width,
+    height, top ou margin, é interpolada.
+  */
+
   const animacaoPerdedor = slotPerdedor.animate(
     [
       {
         opacity: 1,
-        transform: "translateY(0)",
+
+        transform: "translate3d(0, 0, 0)",
       },
       {
         opacity: 0,
-        transform: "translateY(14px)",
+
+        transform: "translate3d(0, 14px, 0)",
       },
     ],
     {
@@ -141,10 +156,10 @@ export async function moverVencedorParaCentro(slotVencedor, slotPerdedor) {
   const animacaoVencedor = slotVencedor.animate(
     [
       {
-        transform: "translateX(0) scale(1)",
+        transform: "translate3d(0, 0, 0) scale(1)",
       },
       {
-        transform: `translateX(${deslocamentoX}px) scale(1.2)`,
+        transform: `translate3d(${deslocamentoX}px, 0, 0) scale(1.2)`,
       },
     ],
     {

@@ -87,10 +87,6 @@ async function prepararDuelo(botaoSelecionado) {
 ========================== */
 
 async function revelarCpu() {
-  /*
-    A CPU pensa por um período curto.
-  */
-
   await esperar(TEMPOS.ANALISE_CPU);
 
   const jogadaCpu = sortearJogadaCpu();
@@ -105,20 +101,7 @@ async function revelarCpu() {
 
   await proximoFrame();
 
-  /*
-    A CPU começa a entrar na arena.
-  */
-
   elementoCpu.classList.add("elemento-cpu--visivel");
-
-  /*
-    Ao mesmo tempo em que a CPU entra,
-    a interface abandona "CPU analisando"
-    e inicia a transição para "Duelo".
-
-    Isso elimina o pequeno intervalo entre
-    a chegada do oponente e o início do duelo.
-  */
 
   definirEstado(ESTADOS.DUELO);
 
@@ -126,19 +109,7 @@ async function revelarCpu() {
     estado: "duelo",
   });
 
-  /*
-    Entrada da CPU e troca da mensagem
-    acontecem simultaneamente.
-  */
-
   await Promise.all([esperar(TEMPOS.ENTRADA_CPU), transicaoMensagem]);
-
-  /*
-    Neste ponto:
-    - a CPU terminou de entrar;
-    - "Duelo" já está visível;
-    - o confronto pode começar imediatamente.
-  */
 
   await executarDuelo();
 }
@@ -179,7 +150,6 @@ async function mostrarEmpate() {
 
   await atualizarMensagem("Empate", {
     destaque: true,
-    impacto: true,
   });
 
   const mensagem = descobrirMensagemConfronto("empate");
@@ -212,7 +182,6 @@ async function mostrarVencedor(resultado) {
 
   await atualizarMensagem(mensagemResultado, {
     destaque: true,
-    impacto: true,
   });
 
   registrarPonto(resultado);
