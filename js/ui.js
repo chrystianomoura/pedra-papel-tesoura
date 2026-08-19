@@ -47,6 +47,14 @@ export const placarPontos = document.querySelector("#placar-pontos");
 export const botaoJogarNovamente = document.querySelector("#jogar-novamente");
 
 /* ==========================
+   CAMADA DE ANIMAÇÃO
+========================== */
+
+export const elementoAnimado = document.querySelector("#elemento-animado");
+
+export const imagemAnimada = document.querySelector("#imagem-animada");
+
+/* ==========================
    ESTADOS DA MENSAGEM
 ========================== */
 
@@ -75,7 +83,7 @@ function aplicarEstadoMensagem(estado) {
 
 export async function atualizarMensagem(
   texto,
-  { destaque = false, impacto = false, estado = null } = {},
+  { destaque = false, estado = null } = {},
 ) {
   mensagemJogo.classList.add("mensagem-jogo--saindo");
 
@@ -90,23 +98,15 @@ export async function atualizarMensagem(
   mensagemJogo.classList.remove(
     "mensagem-jogo--saindo",
     "mensagem-jogo--entrando",
-    "mensagem-jogo--impacto",
   );
 
   void mensagemJogo.offsetWidth;
 
-  if (impacto) {
-    mensagemJogo.classList.add("mensagem-jogo--impacto");
-  } else {
-    mensagemJogo.classList.add("mensagem-jogo--entrando");
-  }
+  mensagemJogo.classList.add("mensagem-jogo--entrando");
 
-  await esperar(impacto ? 650 : TEMPOS.ENTRADA_MENSAGEM);
+  await esperar(TEMPOS.ENTRADA_MENSAGEM);
 
-  mensagemJogo.classList.remove(
-    "mensagem-jogo--entrando",
-    "mensagem-jogo--impacto",
-  );
+  mensagemJogo.classList.remove("mensagem-jogo--entrando");
 }
 
 /* ==========================
@@ -217,13 +217,10 @@ export function restaurarElementosIniciais() {
   });
 
   botoesJogada.forEach((botao) => {
-    botao.classList.remove(
-      "elemento--selecionado",
-      "elemento--saindo",
-      "elemento--celebrando",
-    );
+    botao.classList.remove("elemento--selecionado", "elemento--saindo");
 
     botao.style.visibility = "";
+    botao.style.pointerEvents = "";
     botao.style.transform = "";
 
     botao.getAnimations().forEach((animacao) => {
@@ -232,6 +229,29 @@ export function restaurarElementosIniciais() {
   });
 
   elementos.hidden = false;
+}
+
+/* ==========================
+   RESET DA CAMADA
+========================== */
+
+function reiniciarCamadaMovimento() {
+  elementoAnimado.getAnimations().forEach((animacao) => {
+    animacao.cancel();
+  });
+
+  elementoAnimado.classList.remove(
+    "elemento-animado--visivel",
+    "elemento-animado--celebrando",
+  );
+
+  elementoAnimado.style.left = "";
+  elementoAnimado.style.top = "";
+  elementoAnimado.style.width = "";
+  elementoAnimado.style.height = "";
+  elementoAnimado.style.transform = "";
+
+  imagemAnimada.src = "";
 }
 
 /* ==========================
@@ -244,11 +264,21 @@ export function reiniciarDuelo() {
 
   limparEstadosMensagem();
 
+  reiniciarCamadaMovimento();
+
+  slotJogador.classList.remove(
+    "slot-duelo--oculto",
+    "slot-duelo--vencedor",
+    "slot-duelo--perdedor",
+  );
+
+  slotCpu.classList.remove(
+    "slot-duelo--oculto",
+    "slot-duelo--vencedor",
+    "slot-duelo--perdedor",
+  );
+
   duelo.classList.remove("duelo--pulo", "duelo--empate");
-
-  slotJogador.classList.remove("slot-duelo--vencedor", "slot-duelo--perdedor");
-
-  slotCpu.classList.remove("slot-duelo--vencedor", "slot-duelo--perdedor");
 
   slotJogador.getAnimations().forEach((animacao) => {
     animacao.cancel();
@@ -262,10 +292,7 @@ export function reiniciarDuelo() {
     animacao.cancel();
   });
 
-  elementoCpu.classList.remove(
-    "elemento-cpu--visivel",
-    "elemento-cpu--celebrando",
-  );
+  elementoCpu.classList.remove("elemento-cpu--visivel");
 
   elementoCpu.setAttribute("aria-hidden", "true");
 

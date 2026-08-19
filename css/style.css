@@ -1,5 +1,6 @@
 /* =========================================================
    PEDRA, PAPEL E TESOURA
+   LAYOUT VERTICAL ÚNICO
    SELEÇÃO, DUELO E RESULTADO
 ========================================================= */
 
@@ -60,7 +61,7 @@ img {
   --cor-dourada-clara: #e6bb69;
   --cor-dourada-suave: rgba(201, 148, 63, 0.72);
 
-  --largura-conteudo: min(92vw, 430px);
+  --largura-conteudo: min(92vw, 460px);
 
   --tamanho-card: clamp(145px, min(47vw, 22.5dvh), 225px);
 
@@ -227,10 +228,6 @@ body {
     opacity 220ms ease;
 }
 
-/* ==========================
-   STATUS — DESTAQUE
-========================== */
-
 .mensagem-jogo--destaque {
   color: var(--cor-dourada);
 
@@ -238,7 +235,7 @@ body {
 }
 
 /* ==========================
-   STATUS — CPU ANALISANDO
+   CPU ANALISANDO
 ========================== */
 
 .mensagem-jogo--analisando {
@@ -273,7 +270,7 @@ body {
 }
 
 /* ==========================
-   STATUS — DUELO
+   DUELO
 ========================== */
 
 .mensagem-jogo--duelo {
@@ -346,6 +343,8 @@ body {
 
   width: 100%;
   min-height: 0;
+
+  display: grid;
 }
 
 .campo-visual {
@@ -353,9 +352,15 @@ body {
 
   width: 100%;
   height: 100%;
+  min-height: 0;
 
   display: grid;
-  place-items: center;
+
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  align-items: center;
+  justify-items: center;
 }
 
 /* ==========================
@@ -376,6 +381,9 @@ body {
 
   align-content: center;
   justify-content: center;
+
+  align-self: center;
+  justify-self: center;
 
   gap: var(--espaco-elementos);
 }
@@ -399,7 +407,8 @@ body {
 ========================== */
 
 .elemento,
-.elemento-cpu {
+.elemento-cpu,
+.elemento-animado {
   width: var(--tamanho-card);
   height: var(--tamanho-card);
 
@@ -443,6 +452,18 @@ body {
   height: var(--ocupacao-tesoura);
 }
 
+/*
+  A imagem usada para animação não possui
+  transição própria.
+
+  Somente o card externo é movimentado.
+*/
+
+.imagem-elemento--animada {
+  transition: none !important;
+  transform: none !important;
+}
+
 /* ==========================
    INTERAÇÃO
 ========================== */
@@ -483,28 +504,49 @@ body {
 }
 
 /* ==========================
-   CÓPIA DE MOVIMENTO
+   CAMADA DE MOVIMENTO
 ========================== */
 
-.elemento-clone-movimento {
-  position: fixed;
+/*
+  Existe desde que a página é carregada.
 
-  z-index: 100;
+  Nenhum card é criado ou destruído durante
+  uma animação.
+*/
+
+.camada-movimento {
+  position: fixed;
+  inset: 0;
+
+  z-index: 200;
+
+  pointer-events: none;
+
+  overflow: hidden;
+}
+
+.elemento-animado {
+  position: absolute;
+
+  visibility: hidden;
+  opacity: 0;
 
   margin: 0;
 
   pointer-events: none;
 
-  transform-origin: center;
+  transform: translate3d(0, 0, 0);
 
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  transform-origin: center center;
+
+  transition: none;
 
   will-change: transform;
 }
 
-.elemento-clone-movimento .imagem-elemento {
-  transform: none !important;
+.elemento-animado--visivel {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* ==========================
@@ -606,7 +648,7 @@ body {
 }
 
 /* ==========================
-   SLOTS DO DUELO
+   SLOTS
 ========================== */
 
 .slot-duelo {
@@ -629,6 +671,13 @@ body {
   grid-area: cpu;
 
   justify-items: start;
+}
+
+.slot-duelo--oculto {
+  visibility: hidden !important;
+  opacity: 0 !important;
+
+  pointer-events: none !important;
 }
 
 /* ==========================
@@ -739,60 +788,53 @@ body {
 }
 
 /* ==========================
-   RESULTADO — VENCEDOR
+   VENCEDOR
 ========================== */
 
 .slot-duelo--vencedor {
   z-index: 5;
-
-  will-change: transform;
 }
 
 .slot-duelo--perdedor {
   pointer-events: none;
-
-  will-change: transform, opacity;
 }
 
 /* ==========================
-   TRÊS PULOS DO VENCEDOR
+   TRÊS PULOS
 ========================== */
 
-.elemento--celebrando,
-.elemento-cpu--celebrando {
-  will-change: transform;
-
+.elemento-animado--celebrando {
   animation: celebrar-vencedor 1.5s ease-out 1;
 }
 
 @keyframes celebrar-vencedor {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) scale(1.2);
   }
 
   12% {
-    transform: translate3d(0, -24px, 0);
+    transform: translate3d(0, -24px, 0) scale(1.2);
   }
 
   24% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) scale(1.2);
   }
 
   42% {
-    transform: translate3d(0, -18px, 0);
+    transform: translate3d(0, -18px, 0) scale(1.2);
   }
 
   54% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) scale(1.2);
   }
 
   70% {
-    transform: translate3d(0, -12px, 0);
+    transform: translate3d(0, -12px, 0) scale(1.2);
   }
 
   82%,
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) scale(1.2);
   }
 }
 
