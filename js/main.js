@@ -17,23 +17,6 @@ const ASSETS = {
   tesoura: "assets/tesoura.png",
 };
 
-const RESULTADOS_VISUAIS = {
-  "pedra-tesoura": {
-    src: "assets/resultados/pedra-vence-tesoura.png",
-    alt: "Pedra vence Tesoura",
-  },
-
-  "papel-pedra": {
-    src: "assets/resultados/papel-vence-pedra.png",
-    alt: "Papel vence Pedra",
-  },
-
-  "tesoura-papel": {
-    src: "assets/resultados/tesoura-vence-papel.png",
-    alt: "Tesoura vence Papel",
-  },
-};
-
 const ESTADOS = {
   ESCOLHENDO: "escolhendo",
   CPU_ANALISANDO: "cpu-analisando",
@@ -41,12 +24,11 @@ const ESTADOS = {
   RESULTADO: "resultado",
 };
 
-/*
-  Todos os tempos da partida ficam centralizados aqui.
-
-  A análise da CPU é propositalmente mais curta que
-  antes, enquanto o restante da cadência permanece igual.
-*/
+const MENSAGENS_CONFRONTO = {
+  "pedra-tesoura": "Pedra esmaga Tesoura",
+  "tesoura-papel": "Tesoura corta Papel",
+  "papel-pedra": "Papel envolve Pedra",
+};
 
 const TEMPOS = {
   SAIDA_OPCOES: 850,
@@ -60,12 +42,16 @@ const TEMPOS = {
   PULO_NORMAL: 700,
   PULO_EMPATE: 1100,
 
-  PAUSA_APOS_PULO: 900,
+  PAUSA_APOS_PULO: 750,
 
-  SAIDA_DUELO: 850,
-  ENTRADA_RESULTADO: 950,
+  SAIDA_PERDEDOR: 650,
+  MOVIMENTO_VENCEDOR: 950,
 
-  LEITURA_RESULTADO: 1100,
+  ENTRADA_CONFRONTO: 450,
+
+  CELEBRACAO_VENCEDOR: 1500,
+
+  LEITURA_RESULTADO: 500,
 
   TROCA_MENSAGEM: 300,
   ENTRADA_MENSAGEM: 500,
@@ -79,6 +65,8 @@ const elementos = document.querySelector("#elementos");
 
 const botoesJogada = [...document.querySelectorAll("[data-jogada]")];
 
+const campoVisual = document.querySelector("#campo-visual");
+
 const mensagemJogo = document.querySelector("#mensagem-jogo");
 
 const rodadaElemento = document.querySelector("#rodada");
@@ -87,20 +75,17 @@ const duelo = document.querySelector("#duelo");
 
 const slotJogador = document.querySelector("#slot-jogador");
 
+const slotCpu = document.querySelector("#slot-cpu");
+
 const elementoCpu = document.querySelector("#elemento-cpu");
+
 const imagemCpu = document.querySelector("#imagem-cpu");
 
-const resultadoFinal = document.querySelector("#resultado-final");
-
-const imagemResultado = document.querySelector("#imagem-resultado");
+const resultadoConfronto = document.querySelector("#resultado-confronto");
 
 const placarPontos = document.querySelector("#placar-pontos");
 
 const botaoJogarNovamente = document.querySelector("#jogar-novamente");
-
-const botaoJogarNovamenteEmpate = document.querySelector(
-  "#jogar-novamente-empate",
-);
 
 /* ==========================
    ESTADO
@@ -139,18 +124,43 @@ function formatarRodada(numero) {
 }
 
 /* ==========================
-   MENSAGEM DA PARTIDA
+   ESTADO VISUAL DA MENSAGEM
+========================== */
+
+function limparEstadosMensagem() {
+  mensagemJogo.classList.remove(
+    "mensagem-jogo--analisando",
+    "mensagem-jogo--duelo",
+  );
+}
+
+function aplicarEstadoMensagem(estado) {
+  limparEstadosMensagem();
+
+  if (estado === "analisando") {
+    mensagemJogo.classList.add("mensagem-jogo--analisando");
+  }
+
+  if (estado === "duelo") {
+    mensagemJogo.classList.add("mensagem-jogo--duelo");
+  }
+}
+
+/* ==========================
+   MENSAGEM SUPERIOR
 ========================== */
 
 async function atualizarMensagem(
   texto,
-  { destaque = false, impacto = false } = {},
+  { destaque = false, impacto = false, estado = null } = {},
 ) {
   mensagemJogo.classList.add("mensagem-jogo--saindo");
 
   await esperar(TEMPOS.TROCA_MENSAGEM);
 
   mensagemJogo.textContent = texto;
+
+  aplicarEstadoMensagem(estado);
 
   mensagemJogo.classList.toggle("mensagem-jogo--destaque", destaque);
 
@@ -174,6 +184,42 @@ async function atualizarMensagem(
     "mensagem-jogo--entrando",
     "mensagem-jogo--impacto",
   );
+}
+
+/* ==========================
+   MENSAGEM DO CONFRONTO
+========================== */
+
+function descobrirMensagemConfronto(resultado) {
+  if (resultado === "empate") {
+    return "Ninguém cede";
+  }
+
+  const vencedor = resultado === "jogador" ? jogadaJogador : jogadaCpu;
+
+  const perdedor = resultado === "jogador" ? jogadaCpu : jogadaJogador;
+
+  return MENSAGENS_CONFRONTO[`${vencedor}-${perdedor}`];
+}
+
+async function mostrarMensagemConfronto(texto) {
+  resultadoConfronto.textContent = texto;
+
+  resultadoConfronto.setAttribute("aria-hidden", "false");
+
+  await proximoFrame();
+
+  resultadoConfronto.classList.add("resultado-confronto--visivel");
+
+  await esperar(TEMPOS.ENTRADA_CONFRONTO);
+}
+
+function esconderMensagemConfronto() {
+  resultadoConfronto.classList.remove("resultado-confronto--visivel");
+
+  resultadoConfronto.setAttribute("aria-hidden", "true");
+
+  resultadoConfronto.textContent = "";
 }
 
 /* ==========================
@@ -259,19 +305,6 @@ function calcularResultado(jogador, cpu) {
   return jogadorVenceu ? "jogador" : "cpu";
 }
 
-function descobrirResultadoVisual(jogador, cpu) {
-  const resultado = calcularResultado(jogador, cpu);
-
-  if (resultado === "empate") {
-    return null;
-  }
-
-  const vencedor = resultado === "jogador" ? jogador : cpu;
-  const perdedor = resultado === "jogador" ? cpu : jogador;
-
-  return RESULTADOS_VISUAIS[`${vencedor}-${perdedor}`];
-}
-
 /* ==========================
    MOVIMENTO PARA O DUELO
 ========================== */
@@ -286,8 +319,11 @@ async function moverJogadorParaDuelo(botaoSelecionado) {
   clone.classList.add("elemento-clone-movimento");
 
   clone.style.left = `${origem.left}px`;
+
   clone.style.top = `${origem.top}px`;
+
   clone.style.width = `${origem.width}px`;
+
   clone.style.height = `${origem.height}px`;
 
   document.body.append(clone);
@@ -297,6 +333,7 @@ async function moverJogadorParaDuelo(botaoSelecionado) {
   botaoSelecionado.classList.add("elemento--selecionado");
 
   botaoSelecionado.style.visibility = "hidden";
+
   botaoSelecionado.style.transform = "none";
 
   await proximoFrame();
@@ -304,13 +341,8 @@ async function moverJogadorParaDuelo(botaoSelecionado) {
   const destino = botaoSelecionado.getBoundingClientRect();
 
   const deslocamentoX = destino.left - origem.left;
+
   const deslocamentoY = destino.top - origem.top;
-
-  /*
-    O clone altera somente sua posição.
-
-    Nenhuma escala é aplicada durante o percurso.
-  */
 
   const animacao = clone.animate(
     [
@@ -323,7 +355,9 @@ async function moverJogadorParaDuelo(botaoSelecionado) {
     ],
     {
       duration: TEMPOS.MOVIMENTO_JOGADOR,
+
       easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+
       fill: "forwards",
     },
   );
@@ -333,6 +367,7 @@ async function moverJogadorParaDuelo(botaoSelecionado) {
   clone.remove();
 
   botaoSelecionado.style.visibility = "visible";
+
   botaoSelecionado.style.transform = "none";
 }
 
@@ -347,7 +382,9 @@ async function prepararDuelo(botaoSelecionado) {
 
   jogadaJogador = botaoSelecionado.dataset.jogada;
 
-  atualizarMensagem("CPU analisando...");
+  atualizarMensagem("CPU analisando", {
+    estado: "analisando",
+  });
 
   botoesJogada.forEach((botao) => {
     if (botao !== botaoSelecionado) {
@@ -363,7 +400,7 @@ async function prepararDuelo(botaoSelecionado) {
 
   elementos.hidden = true;
 
-  await esperar(650);
+  await esperar(450);
 
   await revelarCpu();
 }
@@ -378,7 +415,8 @@ async function revelarCpu() {
   jogadaCpu = sortearJogadaCpu();
 
   imagemCpu.src = ASSETS[jogadaCpu];
-  imagemCpu.alt = jogadaCpu;
+
+  imagemCpu.alt = "";
 
   elementoCpu.setAttribute("aria-hidden", "false");
 
@@ -390,18 +428,20 @@ async function revelarCpu() {
 
   estadoAtual = ESTADOS.DUELO;
 
-  await atualizarMensagem("Duelo");
+  await atualizarMensagem("Duelo", {
+    estado: "duelo",
+  });
 
   await esperar(TEMPOS.LEITURA_DUELO);
 
-  await executarPulo();
+  await executarDuelo();
 }
 
 /* ==========================
-   PULO DO DUELO
+   DUELO
 ========================== */
 
-async function executarPulo() {
+async function executarDuelo() {
   const resultado = calcularResultado(jogadaJogador, jogadaCpu);
 
   if (resultado === "empate") {
@@ -426,7 +466,7 @@ async function executarPulo() {
 
   await esperar(TEMPOS.PAUSA_APOS_PULO);
 
-  await mostrarResultado(resultado);
+  await mostrarVencedor(resultado);
 }
 
 /* ==========================
@@ -441,74 +481,151 @@ async function mostrarEmpate() {
     impacto: true,
   });
 
+  const mensagem = descobrirMensagemConfronto("empate");
+
+  await mostrarMensagemConfronto(mensagem);
+
   await esperar(TEMPOS.LEITURA_RESULTADO);
 
-  mostrarBotao(botaoJogarNovamenteEmpate);
+  mostrarBotaoNovaRodada();
 }
 
 /* ==========================
-   VITÓRIA / DERROTA
+   VENCEDOR
 ========================== */
 
-async function mostrarResultado(resultado) {
+async function mostrarVencedor(resultado) {
   estadoAtual = ESTADOS.RESULTADO;
 
-  const resultadoDaRodada = descobrirResultadoVisual(jogadaJogador, jogadaCpu);
+  const jogadorVenceu = resultado === "jogador";
 
-  imagemResultado.src = resultadoDaRodada.src;
-  imagemResultado.alt = resultadoDaRodada.alt;
+  const slotVencedor = jogadorVenceu ? slotJogador : slotCpu;
 
-  resultadoFinal.hidden = false;
+  const slotPerdedor = jogadorVenceu ? slotCpu : slotJogador;
 
-  duelo.classList.add("duelo--saindo");
+  const elementoVencedor = jogadorVenceu
+    ? slotJogador.querySelector(".elemento")
+    : elementoCpu;
 
-  await esperar(TEMPOS.SAIDA_DUELO);
+  const mensagemResultado = jogadorVenceu ? "Você venceu" : "CPU venceu";
 
-  duelo.hidden = true;
+  await atualizarMensagem(mensagemResultado, {
+    destaque: true,
+    impacto: true,
+  });
 
-  await proximoFrame();
-
-  resultadoFinal.classList.add("resultado-final--visivel");
-
-  await esperar(TEMPOS.ENTRADA_RESULTADO);
-
-  if (resultado === "jogador") {
+  if (jogadorVenceu) {
     pontosJogador += 1;
-
-    await atualizarMensagem("Você venceu", {
-      destaque: true,
-      impacto: true,
-    });
   } else {
     pontosCpu += 1;
-
-    await atualizarMensagem("CPU venceu", {
-      destaque: true,
-      impacto: true,
-    });
   }
 
   atualizarPlacar();
 
+  const mensagemConfronto = descobrirMensagemConfronto(resultado);
+
+  await mostrarMensagemConfronto(mensagemConfronto);
+
+  await moverVencedorParaCentro(slotVencedor, slotPerdedor);
+
+  await celebrarVencedor(elementoVencedor);
+
   await esperar(TEMPOS.LEITURA_RESULTADO);
 
-  mostrarBotao(botaoJogarNovamente);
+  mostrarBotaoNovaRodada();
 }
 
 /* ==========================
-   BOTÕES DE NOVA RODADA
+   CENTRALIZAR VENCEDOR
 ========================== */
 
-function mostrarBotao(botao) {
-  botao.classList.add("jogar-novamente--visivel");
+async function moverVencedorParaCentro(slotVencedor, slotPerdedor) {
+  const vencedorRect = slotVencedor.getBoundingClientRect();
 
-  botao.setAttribute("aria-hidden", "false");
+  const campoRect = campoVisual.getBoundingClientRect();
+
+  const centroVencedorX = vencedorRect.left + vencedorRect.width / 2;
+
+  const centroCampoX = campoRect.left + campoRect.width / 2;
+
+  const deslocamentoX = centroCampoX - centroVencedorX;
+
+  slotVencedor.classList.add("slot-duelo--vencedor");
+
+  slotPerdedor.classList.add("slot-duelo--perdedor");
+
+  const animacaoPerdedor = slotPerdedor.animate(
+    [
+      {
+        opacity: 1,
+        transform: "translateY(0)",
+      },
+      {
+        opacity: 0,
+        transform: "translateY(14px)",
+      },
+    ],
+    {
+      duration: TEMPOS.SAIDA_PERDEDOR,
+
+      easing: "ease",
+
+      fill: "forwards",
+    },
+  );
+
+  const animacaoVencedor = slotVencedor.animate(
+    [
+      {
+        transform: "translateX(0) scale(1)",
+      },
+      {
+        transform: `translateX(${deslocamentoX}px) scale(1.2)`,
+      },
+    ],
+    {
+      duration: TEMPOS.MOVIMENTO_VENCEDOR,
+
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+
+      fill: "forwards",
+    },
+  );
+
+  await Promise.all([animacaoPerdedor.finished, animacaoVencedor.finished]);
 }
 
-function esconderBotao(botao) {
-  botao.classList.remove("jogar-novamente--visivel");
+/* ==========================
+   CELEBRAÇÃO DO VENCEDOR
+========================== */
 
-  botao.setAttribute("aria-hidden", "true");
+async function celebrarVencedor(elemento) {
+  const classe =
+    elemento === elementoCpu
+      ? "elemento-cpu--celebrando"
+      : "elemento--celebrando";
+
+  elemento.classList.add(classe);
+
+  await esperar(TEMPOS.CELEBRACAO_VENCEDOR);
+
+  elemento.classList.remove(classe);
+}
+
+/* ==========================
+   JOGAR NOVAMENTE
+========================== */
+
+function mostrarBotaoNovaRodada() {
+  botaoJogarNovamente.classList.add("jogar-novamente--visivel");
+
+  botaoJogarNovamente.setAttribute("aria-hidden", "false");
+}
+
+function esconderBotaoNovaRodada() {
+  botaoJogarNovamente.classList.remove("jogar-novamente--visivel");
+
+  botaoJogarNovamente.setAttribute("aria-hidden", "true");
 }
 
 /* ==========================
@@ -523,40 +640,62 @@ function restaurarElementosIniciais() {
   });
 
   botoesJogada.forEach((botao) => {
-    botao.classList.remove("elemento--selecionado", "elemento--saindo");
+    botao.classList.remove(
+      "elemento--selecionado",
+      "elemento--saindo",
+      "elemento--celebrando",
+    );
 
     botao.style.visibility = "";
     botao.style.transform = "";
+
+    botao.getAnimations().forEach((animacao) => {
+      animacao.cancel();
+    });
   });
 
   elementos.hidden = false;
 }
 
 /* ==========================
-   RESET DA ARENA
+   RESET DO DUELO
 ========================== */
 
-function reiniciarArena() {
-  esconderBotao(botaoJogarNovamente);
-  esconderBotao(botaoJogarNovamenteEmpate);
+function reiniciarDuelo() {
+  esconderBotaoNovaRodada();
+  esconderMensagemConfronto();
 
-  duelo.classList.remove("duelo--pulo", "duelo--empate", "duelo--saindo");
+  limparEstadosMensagem();
 
-  duelo.hidden = true;
+  duelo.classList.remove("duelo--pulo", "duelo--empate");
 
-  elementoCpu.classList.remove("elemento-cpu--visivel");
+  slotJogador.classList.remove("slot-duelo--vencedor", "slot-duelo--perdedor");
+
+  slotCpu.classList.remove("slot-duelo--vencedor", "slot-duelo--perdedor");
+
+  slotJogador.getAnimations().forEach((animacao) => {
+    animacao.cancel();
+  });
+
+  slotCpu.getAnimations().forEach((animacao) => {
+    animacao.cancel();
+  });
+
+  elementoCpu.getAnimations().forEach((animacao) => {
+    animacao.cancel();
+  });
+
+  elementoCpu.classList.remove(
+    "elemento-cpu--visivel",
+    "elemento-cpu--celebrando",
+  );
 
   elementoCpu.setAttribute("aria-hidden", "true");
 
   imagemCpu.src = "";
   imagemCpu.alt = "";
 
-  resultadoFinal.classList.remove("resultado-final--visivel");
-
-  resultadoFinal.hidden = true;
-
-  imagemResultado.src = "";
-  imagemResultado.alt = "";
+  duelo.hidden = true;
 
   restaurarElementosIniciais();
 }
@@ -573,7 +712,7 @@ async function iniciarNovaRodada() {
 
   estadoAtual = ESTADOS.ESCOLHENDO;
 
-  reiniciarArena();
+  reiniciarDuelo();
 
   atualizarRodada();
 
@@ -597,5 +736,3 @@ botoesJogada.forEach((botao) => {
 });
 
 botaoJogarNovamente.addEventListener("click", iniciarNovaRodada);
-
-botaoJogarNovamenteEmpate.addEventListener("click", iniciarNovaRodada);

@@ -65,10 +65,13 @@ img {
   --tamanho-card: clamp(145px, min(47vw, 22.5dvh), 225px);
 
   /*
-    Mantém os três assets padronizados e cria
-    um respiro visual dentro de cada card.
+    Pedra e papel utilizam a ocupação padrão.
+
+    A tesoura possui uma silhueta naturalmente
+    mais longa e recebe uma ocupação própria.
   */
   --ocupacao-elemento: 88%;
+  --ocupacao-tesoura: 80%;
 
   --espaco-elementos: clamp(0.75rem, 3.7vw, 1.1rem);
 }
@@ -176,7 +179,6 @@ body {
 @keyframes rodada-atualizada {
   0% {
     opacity: 0.35;
-
     transform: scale(0.88);
   }
 
@@ -211,12 +213,18 @@ body {
 }
 
 .mensagem-jogo {
-  min-height: 1.4em;
+  position: relative;
+
+  min-height: 1.45em;
 
   color: var(--cor-texto);
 
-  font-size: clamp(1.2rem, 5.5vw, 1.55rem);
-  font-weight: 600;
+  /*
+    Maior que antes para todos os estados:
+    escolha, análise, duelo e resultado.
+  */
+  font-size: clamp(1.45rem, 6vw, 1.8rem);
+  font-weight: 700;
 
   letter-spacing: 0.11em;
 
@@ -229,11 +237,86 @@ body {
     transform 300ms ease;
 }
 
+/* ==========================
+   STATUS — DESTAQUE
+========================== */
+
 .mensagem-jogo--destaque {
   color: var(--cor-dourada);
 
   font-weight: 700;
 }
+
+/* ==========================
+   STATUS — CPU ANALISANDO
+========================== */
+
+/*
+  O estado de análise permanece textual,
+  mas ganha movimento pelas reticências.
+
+  Não usamos spinner ou ícone genérico.
+*/
+
+.mensagem-jogo--analisando {
+  color: var(--cor-texto);
+
+  letter-spacing: 0.13em;
+}
+
+.mensagem-jogo--analisando::after {
+  content: "";
+
+  display: inline-block;
+
+  width: 1.15em;
+
+  margin-left: 0.08em;
+
+  text-align: left;
+
+  animation: cpu-analisando-pontos 1.1s steps(4, end) infinite;
+}
+
+@keyframes cpu-analisando-pontos {
+  0% {
+    content: "";
+  }
+
+  25% {
+    content: ".";
+  }
+
+  50% {
+    content: "..";
+  }
+
+  75%,
+  100% {
+    content: "...";
+  }
+}
+
+/* ==========================
+   STATUS — DUELO
+========================== */
+
+/*
+  "Duelo" ganha o dourado do sistema e uma linha
+  curta que abre abaixo do texto.
+
+  É um estado de transição, não um botão.
+*/
+
+.mensagem-jogo--duelo {
+  color: var(--cor-dourada-clara);
+
+  letter-spacing: 0.2em;
+}
+
+/* ==========================
+   TROCA DE MENSAGEM
+========================== */
 
 .mensagem-jogo--saindo {
   opacity: 0;
@@ -401,10 +484,6 @@ body {
 .elemento {
   cursor: pointer;
 
-  /*
-    O card permanece com tamanho constante.
-    Apenas a imagem interna cresce na interação.
-  */
   transition:
     opacity 700ms ease,
     background-color 250ms ease;
@@ -421,6 +500,11 @@ body {
   object-fit: contain;
 
   transition: transform 250ms ease;
+}
+
+.imagem-elemento[src$="tesoura.png"] {
+  width: var(--ocupacao-tesoura);
+  height: var(--ocupacao-tesoura);
 }
 
 /* ==========================
@@ -493,18 +577,146 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
   grid-template-rows:
-    minmax(0, 1fr)
+    auto
+    var(--tamanho-card)
     auto;
 
   grid-template-areas:
+    "mensagem mensagem"
     "jogador cpu"
     "acao acao";
 
+  align-content: center;
   align-items: center;
 
   column-gap: clamp(0.7rem, 4vw, 1.25rem);
-  row-gap: clamp(0.9rem, 2.2vh, 1.2rem);
+
+  /*
+    O vencedor cresce e ainda pula até 24px.
+
+    Portanto existe espaço real entre a área
+    da explicação e a área dos cards.
+  */
+  row-gap: clamp(2.1rem, 5.2vh, 3rem);
+
+  /*
+    Sobe o conjunto do resultado sem aproximar
+    o vencedor do placar.
+  */
+  transform: translateY(clamp(-30px, -3.5vh, -18px));
 }
+
+/* ==========================
+   MENSAGEM DO CONFRONTO
+========================== */
+
+.area-confronto {
+  grid-area: mensagem;
+
+  width: 100%;
+
+  min-height: clamp(2rem, 4vh, 2.6rem);
+
+  display: grid;
+  place-items: center;
+
+  /*
+    A mensagem sobe independentemente dos cards.
+  */
+  transform: translateY(clamp(0px, 0.7vh, 8px));
+  /*
+    Segurança adicional contra o primeiro pulo,
+    que é o salto mais alto.
+  */
+  margin-bottom: clamp(1.35rem, 3.4vh, 1.9rem);
+}
+
+/*
+  Resultado editorial.
+
+  Não possui fundo, moldura ou aparência
+  clicável. As linhas fazem a ligação visual
+  com o restante da interface.
+*/
+
+.resultado-confronto {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(20px, 1fr)
+    auto
+    minmax(20px, 1fr);
+
+  align-items: center;
+
+  gap: clamp(0.65rem, 3vw, 1rem);
+
+  color: var(--cor-dourada-clara);
+
+  font-size: clamp(1.12rem, 4.8vw, 1.35rem);
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+  line-height: 1;
+
+  text-align: center;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+
+  visibility: hidden;
+  opacity: 0;
+
+  transform: translateY(8px);
+
+  transition:
+    opacity 450ms ease,
+    transform 450ms ease;
+}
+
+.resultado-confronto::before,
+.resultado-confronto::after {
+  content: "";
+
+  height: 1px;
+
+  background: var(--cor-linha);
+}
+
+.resultado-confronto--visivel {
+  visibility: visible;
+  opacity: 1;
+
+  transform: translateY(0);
+
+  animation: entrada-confronto 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes entrada-confronto {
+  0% {
+    opacity: 0;
+
+    transform: translateY(8px);
+  }
+
+  60% {
+    opacity: 1;
+
+    transform: translateY(-2px);
+  }
+
+  100% {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
+   SLOTS DO DUELO
+========================== */
 
 .slot-duelo {
   display: grid;
@@ -562,7 +774,7 @@ body {
 }
 
 /* ==========================
-   PULO NORMAL
+   PULO DO DUELO
 ========================== */
 
 .duelo--pulo .slot-duelo--jogador,
@@ -624,75 +836,77 @@ body {
 }
 
 /* ==========================
-   AÇÃO NO EMPATE
+   RESULTADO — VENCEDOR
 ========================== */
 
-.acao-empate {
+.slot-duelo--vencedor {
+  z-index: 5;
+}
+
+.slot-duelo--perdedor {
+  pointer-events: none;
+}
+
+/* ==========================
+   TRÊS PULOS DO VENCEDOR
+========================== */
+
+.elemento--celebrando,
+.elemento-cpu--celebrando {
+  animation: celebrar-vencedor 1.5s ease-out 1;
+}
+
+@keyframes celebrar-vencedor {
+  0% {
+    transform: translateY(0);
+  }
+
+  /* Pulo 1 */
+
+  12% {
+    transform: translateY(-24px);
+  }
+
+  24% {
+    transform: translateY(0);
+  }
+
+  /* Pulo 2 */
+
+  42% {
+    transform: translateY(-18px);
+  }
+
+  54% {
+    transform: translateY(0);
+  }
+
+  /* Pulo 3 */
+
+  70% {
+    transform: translateY(-12px);
+  }
+
+  82% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
+   AÇÃO DO DUELO
+========================== */
+
+.acao-duelo {
   grid-area: acao;
 
   min-height: clamp(3.2rem, 7vh, 4.2rem);
 
   display: grid;
   place-items: center;
-}
-
-/* ==========================
-   SAÍDA DO DUELO
-========================== */
-
-.duelo--saindo {
-  opacity: 0;
-
-  transform: scale(0.9);
-
-  transition:
-    opacity 800ms ease,
-    transform 800ms ease;
-}
-
-/* ==========================
-   RESULTADO FINAL
-========================== */
-
-.resultado-final {
-  position: absolute;
-  inset: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  gap: clamp(0.8rem, 2vh, 1.2rem);
-
-  opacity: 0;
-
-  transform: scale(0.9);
-
-  transition:
-    opacity 900ms ease,
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.resultado-final--visivel {
-  opacity: 1;
-
-  transform: scale(1);
-}
-
-.resultado-visual {
-  width: 100%;
-  min-height: 0;
-
-  display: grid;
-  place-items: center;
-}
-
-.imagem-resultado {
-  width: min(100%, 420px);
-  max-height: min(46dvh, 430px);
-
-  object-fit: contain;
 }
 
 /* ==========================
@@ -823,11 +1037,29 @@ body {
     --tamanho-card: clamp(110px, min(37vw, 18dvh), 150px);
   }
 
-  .imagem-resultado {
-    max-height: 38dvh;
+  .mensagem-jogo {
+    font-size: clamp(1.2rem, 5vw, 1.45rem);
   }
 
-  .acao-empate {
+  .duelo {
+    row-gap: 1.15rem;
+
+    transform: translateY(-10px);
+  }
+
+  .area-confronto {
+    min-height: 1.8rem;
+
+    margin-bottom: 0.75rem;
+
+    transform: translateY(-10px);
+  }
+
+  .resultado-confronto {
+    font-size: 1rem;
+  }
+
+  .acao-duelo {
     min-height: 2.8rem;
   }
 }

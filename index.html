@@ -56,7 +56,7 @@
       =========================== -->
 
       <section class="arena" id="arena" aria-label="Arena da partida">
-        <div class="campo-visual">
+        <div class="campo-visual" id="campo-visual">
           <!-- ==========================
                SELEÇÃO INICIAL
           =========================== -->
@@ -95,10 +95,18 @@
           </div>
 
           <!-- ==========================
-               DUELO
+               DUELO / RESULTADO
           =========================== -->
 
           <div class="duelo" id="duelo" hidden>
+            <div class="area-confronto">
+              <p
+                class="resultado-confronto"
+                id="resultado-confronto"
+                aria-hidden="true"
+              ></p>
+            </div>
+
             <div class="slot-duelo slot-duelo--jogador" id="slot-jogador"></div>
 
             <div class="slot-duelo slot-duelo--cpu" id="slot-cpu">
@@ -107,40 +115,16 @@
               </div>
             </div>
 
-            <div class="acao-empate">
+            <div class="acao-duelo">
               <button
-                class="jogar-novamente jogar-novamente--empate"
-                id="jogar-novamente-empate"
+                class="jogar-novamente"
+                id="jogar-novamente"
                 type="button"
                 aria-hidden="true"
               >
                 Jogar novamente
               </button>
             </div>
-          </div>
-
-          <!-- ==========================
-               RESULTADO FINAL
-          =========================== -->
-
-          <div class="resultado-final" id="resultado-final" hidden>
-            <figure class="resultado-visual">
-              <img
-                class="imagem-resultado"
-                id="imagem-resultado"
-                src=""
-                alt=""
-              />
-            </figure>
-
-            <button
-              class="jogar-novamente"
-              id="jogar-novamente"
-              type="button"
-              aria-hidden="true"
-            >
-              Jogar novamente
-            </button>
           </div>
         </div>
       </section>
