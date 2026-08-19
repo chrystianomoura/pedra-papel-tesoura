@@ -1,6 +1,6 @@
 /* =========================================================
    PEDRA, PAPEL E TESOURA
-   BASE VISUAL DOS ELEMENTOS
+   TELA DE SELEÇÃO
    RESPONSIVIDADE FLUIDA
 ========================================================= */
 
@@ -48,36 +48,34 @@ img {
   --cor-texto: #e8e8e8;
   --cor-texto-secundario: #8a8c8e;
 
+  --cor-linha: rgba(255, 255, 255, 0.18);
+
   --cor-fundo-elemento: rgba(255, 255, 255, 0.035);
   --cor-fundo-elemento-ativo: rgba(255, 255, 255, 0.065);
 
   /*
-    A área principal acompanha a largura da viewport,
+    A área principal acompanha a viewport,
     mas nunca ultrapassa 430px.
   */
   --largura-conteudo: min(92vw, 430px);
 
   /*
-    Os três cards crescem de forma fluida com a viewport.
+    O tamanho dos cards considera tanto a largura
+    quanto a altura disponível.
 
-    145px = limite mínimo
-    43vw  = tamanho fluido ideal
-    205px = limite máximo
+    Isso permite aumentar os elementos sem provocar
+    rolagem em celulares com pouca altura.
   */
-  --tamanho-card: clamp(145px, 43vw, 205px);
+  --tamanho-card: clamp(145px, min(47vw, 22.5dvh), 225px);
 
   /*
-    Pedra, papel e tesoura ocupam a mesma porcentagem
-    dentro de seus respectivos cards.
+    Pedra, papel e tesoura ocupam a mesma
+    porcentagem dentro dos cards.
   */
   --ocupacao-elemento: 95%;
 
   /*
-    O espaçamento também acompanha a viewport.
-
-    Em uma viewport próxima de 390px,
-    3.7vw corresponde aproximadamente aos 0.9rem
-    escolhidos como referência visual.
+    Espaçamento fluido entre os três cards.
   */
   --espaco-elementos: clamp(0.75rem, 3.7vw, 1.1rem);
 }
@@ -92,7 +90,7 @@ body {
   background: var(--cor-fundo);
   color: var(--cor-texto);
 
-  font-family: "Arial Narrow", Arial, Helvetica, sans-serif;
+  font-family: "Barlow Condensed", sans-serif;
 }
 
 /* ==========================
@@ -109,8 +107,8 @@ body {
   flex-direction: column;
   align-items: center;
 
-  padding: clamp(1.5rem, 5vh, 3rem) clamp(0.75rem, 3vw, 1rem)
-    clamp(1rem, 3vh, 1.5rem);
+  padding: clamp(0.85rem, 2.5vh, 1.5rem) clamp(0.75rem, 3vw, 1rem)
+    clamp(0.6rem, 1.5vh, 1rem);
 }
 
 /* ==========================
@@ -118,18 +116,20 @@ body {
 ========================== */
 
 .cabecalho {
+  width: 100%;
+
   display: grid;
   justify-items: center;
 
-  gap: clamp(0.55rem, 2vw, 0.8rem);
+  gap: clamp(0.9rem, 2.5vh, 1.3rem);
 }
 
 .titulo {
-  font-size: clamp(1.4rem, 6vw, 1.8rem);
+  font-size: clamp(2rem, 9vw, 2.8rem);
   font-weight: 700;
 
-  letter-spacing: 0.12em;
-  line-height: 1.2;
+  letter-spacing: 0.08em;
+  line-height: 1;
 
   text-align: center;
   text-transform: uppercase;
@@ -139,15 +139,112 @@ body {
   display: block;
 }
 
+/* ==========================
+   RODADA
+========================== */
+
+.linha-rodada {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  gap: clamp(0.8rem, 4vw, 1.4rem);
+}
+
+.linha-rodada::before,
+.linha-rodada::after {
+  content: "";
+
+  height: 1px;
+
+  background: var(--cor-linha);
+}
+
 .rodada {
   color: var(--cor-texto-secundario);
 
-  font-size: clamp(0.68rem, 2.7vw, 0.78rem);
-  font-weight: 700;
+  font-size: clamp(0.95rem, 4vw, 1.1rem);
+  font-weight: 600;
 
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
+
+  white-space: nowrap;
 
   text-transform: uppercase;
+}
+
+/* ==========================
+   MENSAGEM DO JOGO
+========================== */
+
+/*
+   A área foi compactada para evitar um grande espaço
+   vazio entre rodada, instrução e elementos.
+*/
+
+.area-mensagem {
+  width: 100%;
+
+  margin-top: clamp(0.7rem, 2vh, 1rem);
+  margin-bottom: clamp(0.65rem, 1.8vh, 1rem);
+
+  display: grid;
+
+  gap: clamp(0.6rem, 1.5vh, 0.8rem);
+}
+
+.mensagem-jogo {
+  font-size: clamp(1.2rem, 5.5vw, 1.55rem);
+  font-weight: 600;
+
+  letter-spacing: 0.11em;
+
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ==========================
+   SEPARADOR
+========================== */
+
+.separador {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  gap: 0.65rem;
+}
+
+.separador::before,
+.separador::after {
+  content: "";
+
+  height: 1px;
+
+  background: var(--cor-linha);
+}
+
+.losango {
+  width: 7px;
+  height: 7px;
+
+  background: var(--cor-linha);
+
+  transform: rotate(45deg);
 }
 
 /* ==========================
@@ -175,13 +272,12 @@ body {
   gap: var(--espaco-elementos);
 
   /*
-    Move o conjunto inteiro para cima sem alterar
-    a geometria interna do grid.
+    Sobe levemente o triângulo inteiro.
 
-    O deslocamento também varia conforme a altura
-    disponível na viewport.
+    O espaço criado pela area-mensagem mantém
+    a pedra afastada do separador.
   */
-  transform: translateY(clamp(-60px, -7vh, -30px));
+  transform: translateY(clamp(-22px, -2vh, -10px));
 }
 
 /* ==========================
@@ -262,28 +358,99 @@ body {
 }
 
 /* ==========================
+   PLACAR
+========================== */
+
+.placar {
+  flex: 0 0 auto;
+
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: auto auto auto;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(2.2rem, 11vw, 4rem);
+
+  /*
+    Aumenta a área vertical do rodapé
+    sem alterar a posição dos elementos.
+  */
+  margin-top: clamp(0.6rem, 1.5vh, 1rem);
+
+  padding:
+    clamp(1rem, 2.5vh, 1.4rem)
+    0
+    clamp(1.1rem, 2.8vh, 1.6rem);
+
+  border-top: 1px solid var(--cor-linha);
+}
+
+/* VOCÊ E CPU */
+
+.placar-jogador,
+.placar-cpu {
+  color: var(--cor-texto);
+
+  font-size: clamp(1.35rem, 5.8vw, 1.65rem);
+  font-weight: 600;
+
+  letter-spacing: 0.12em;
+
+  white-space: nowrap;
+
+  text-transform: uppercase;
+}
+
+/* PONTUAÇÃO */
+
+.placar-pontos {
+  color: var(--cor-texto-secundario);
+
+  font-size: clamp(1.4rem, 6vw, 1.7rem);
+  font-weight: 600;
+
+  letter-spacing: 0.14em;
+
+  white-space: nowrap;
+}
+
+/* ==========================
    TELAS COM POUCA ALTURA
 ========================== */
 
-/*
-   A largura já é resolvida pelo sistema fluido acima.
-
-   Este breakpoint existe somente porque uma tela muito
-   baixa pode não ter espaço vertical suficiente para
-   manter a composição no tamanho normal.
-*/
-
 @media (max-height: 680px) {
   :root {
-    --tamanho-card: clamp(125px, 36vw, 155px);
+    --tamanho-card: clamp(110px, min(37vw, 18dvh), 150px);
   }
 
   .jogo {
-    padding-top: 1rem;
-    padding-bottom: 0.75rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .cabecalho {
+    gap: 0.6rem;
+  }
+
+  .area-mensagem {
+    margin-top: 0.8rem;
+    margin-bottom: 0.4rem;
+
+    gap: 0.75rem;
   }
 
   .elementos {
-    transform: translateY(-20px);
+    transform: translateY(-5px);
+  }
+
+  .placar {
+    gap: clamp(1.5rem, 8vw, 2.5rem);
+
+    margin-top: 0.35rem;
+    padding-block: 0.45rem;
   }
 }

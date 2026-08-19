@@ -7,6 +7,14 @@
 
     <title>Pedra, Papel e Tesoura</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
@@ -22,8 +30,22 @@
           <span>e Tesoura</span>
         </h1>
 
-        <p class="rodada">Rodada 01</p>
+        <div class="linha-rodada">
+          <p class="rodada">Rodada 01</p>
+        </div>
       </header>
+
+      <!-- ==========================
+           MENSAGEM DO JOGO
+      =========================== -->
+
+      <div class="area-mensagem">
+        <p class="mensagem-jogo">Escolha sua jogada:</p>
+
+        <div class="separador" aria-hidden="true">
+          <span class="losango"></span>
+        </div>
+      </div>
 
       <!-- ==========================
            OPÇÕES DE JOGADA
@@ -36,11 +58,7 @@
           type="button"
           aria-label="Escolher Pedra"
         >
-          <img
-            class="imagem-elemento"
-            src="assets/pedra.png"
-            alt=""
-          />
+          <img class="imagem-elemento" src="assets/pedra.png" alt="" />
         </button>
 
         <!-- Papel -->
@@ -49,11 +67,7 @@
           type="button"
           aria-label="Escolher Papel"
         >
-          <img
-            class="imagem-elemento"
-            src="assets/papel.png"
-            alt=""
-          />
+          <img class="imagem-elemento" src="assets/papel.png" alt="" />
         </button>
 
         <!-- Tesoura -->
@@ -62,13 +76,21 @@
           type="button"
           aria-label="Escolher Tesoura"
         >
-          <img
-            class="imagem-elemento"
-            src="assets/tesoura.png"
-            alt=""
-          />
+          <img class="imagem-elemento" src="assets/tesoura.png" alt="" />
         </button>
       </section>
+
+      <!-- ==========================
+           PLACAR
+      =========================== -->
+
+      <footer class="placar" aria-label="Placar da partida">
+        <span class="placar-jogador">Você</span>
+
+        <strong class="placar-pontos">0 : 0</strong>
+
+        <span class="placar-cpu">CPU</span>
+      </footer>
     </main>
   </body>
 </html>
