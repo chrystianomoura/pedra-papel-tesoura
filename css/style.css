@@ -1,7 +1,6 @@
 /* =========================================================
    PEDRA, PAPEL E TESOURA
-   TELA DE SELEÇÃO
-   RESPONSIVIDADE FLUIDA
+   SELEÇÃO, DUELO E RESULTADO
 ========================================================= */
 
 /* ==========================
@@ -38,8 +37,12 @@ img {
   -webkit-user-drag: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /* ==========================
-   VARIÁVEIS GLOBAIS
+   VARIÁVEIS
 ========================== */
 
 :root {
@@ -53,30 +56,20 @@ img {
   --cor-fundo-elemento: rgba(255, 255, 255, 0.035);
   --cor-fundo-elemento-ativo: rgba(255, 255, 255, 0.065);
 
-  /*
-    A área principal acompanha a viewport,
-    mas nunca ultrapassa 430px.
-  */
+  --cor-dourada: #c9943f;
+  --cor-dourada-clara: #e6bb69;
+  --cor-dourada-suave: rgba(201, 148, 63, 0.72);
+
   --largura-conteudo: min(92vw, 430px);
 
-  /*
-    O tamanho dos cards considera tanto a largura
-    quanto a altura disponível.
-
-    Isso permite aumentar os elementos sem provocar
-    rolagem em celulares com pouca altura.
-  */
   --tamanho-card: clamp(145px, min(47vw, 22.5dvh), 225px);
 
   /*
-    Pedra, papel e tesoura ocupam a mesma
-    porcentagem dentro dos cards.
+    Mantém os três assets padronizados e cria
+    um respiro visual dentro de cada card.
   */
-  --ocupacao-elemento: 95%;
+  --ocupacao-elemento: 88%;
 
-  /*
-    Espaçamento fluido entre os três cards.
-  */
   --espaco-elementos: clamp(0.75rem, 3.7vw, 1.1rem);
 }
 
@@ -147,11 +140,7 @@ body {
   width: 100%;
 
   display: grid;
-
-  grid-template-columns:
-    1fr
-    auto
-    1fr;
+  grid-template-columns: 1fr auto 1fr;
 
   align-items: center;
 
@@ -168,10 +157,10 @@ body {
 }
 
 .rodada {
-  color: var(--cor-texto-secundario);
+  color: var(--cor-dourada);
 
   font-size: clamp(0.95rem, 4vw, 1.1rem);
-  font-weight: 600;
+  font-weight: 700;
 
   letter-spacing: 0.16em;
 
@@ -180,20 +169,41 @@ body {
   text-transform: uppercase;
 }
 
-/* ==========================
-   MENSAGEM DO JOGO
-========================== */
+.rodada--atualizada {
+  animation: rodada-atualizada 750ms cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-/*
-   A área foi compactada para evitar um grande espaço
-   vazio entre rodada, instrução e elementos.
-*/
+@keyframes rodada-atualizada {
+  0% {
+    opacity: 0.35;
+
+    transform: scale(0.88);
+  }
+
+  55% {
+    color: var(--cor-dourada-clara);
+    opacity: 1;
+
+    transform: scale(1.14);
+  }
+
+  100% {
+    color: var(--cor-dourada);
+    opacity: 1;
+
+    transform: scale(1);
+  }
+}
+
+/* ==========================
+   STATUS DA PARTIDA
+========================== */
 
 .area-mensagem {
   width: 100%;
 
   margin-top: clamp(0.7rem, 2vh, 1rem);
-  margin-bottom: clamp(0.65rem, 1.8vh, 1rem);
+  margin-bottom: clamp(0.5rem, 1.2vh, 0.75rem);
 
   display: grid;
 
@@ -201,6 +211,10 @@ body {
 }
 
 .mensagem-jogo {
+  min-height: 1.4em;
+
+  color: var(--cor-texto);
+
   font-size: clamp(1.2rem, 5.5vw, 1.55rem);
   font-weight: 600;
 
@@ -208,6 +222,73 @@ body {
 
   text-align: center;
   text-transform: uppercase;
+
+  transition:
+    color 300ms ease,
+    opacity 300ms ease,
+    transform 300ms ease;
+}
+
+.mensagem-jogo--destaque {
+  color: var(--cor-dourada);
+
+  font-weight: 700;
+}
+
+.mensagem-jogo--saindo {
+  opacity: 0;
+
+  transform: translateY(-8px);
+}
+
+.mensagem-jogo--entrando {
+  animation: mensagem-entrando 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mensagem-entrando {
+  from {
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
+   STATUS DE IMPACTO
+========================== */
+
+.mensagem-jogo--impacto {
+  animation: impacto-mensagem 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes impacto-mensagem {
+  0% {
+    opacity: 0;
+
+    transform: scale(0.74);
+  }
+
+  52% {
+    opacity: 1;
+
+    transform: scale(1.16);
+  }
+
+  75% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+
+    transform: scale(1);
+  }
 }
 
 /* ==========================
@@ -218,11 +299,7 @@ body {
   width: 100%;
 
   display: grid;
-
-  grid-template-columns:
-    1fr
-    auto
-    1fr;
+  grid-template-columns: 1fr auto 1fr;
 
   align-items: center;
 
@@ -248,14 +325,32 @@ body {
 }
 
 /* ==========================
-   ELEMENTOS
+   ARENA
 ========================== */
 
-.elementos {
+.arena {
   flex: 1;
 
   width: 100%;
   min-height: 0;
+}
+
+.campo-visual {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+}
+
+/* ==========================
+   SELEÇÃO INICIAL
+========================== */
+
+.elementos {
+  width: 100%;
 
   display: grid;
 
@@ -270,22 +365,11 @@ body {
   justify-content: center;
 
   gap: var(--espaco-elementos);
-
-  /*
-    Sobe levemente o triângulo inteiro.
-
-    O espaço criado pela area-mensagem mantém
-    a pedra afastada do separador.
-  */
-  transform: translateY(clamp(-22px, -2vh, -10px));
 }
-
-/* ==========================
-   POSIÇÕES NO GRID
-========================== */
 
 .elemento--pedra {
   grid-area: pedra;
+
   justify-self: center;
 }
 
@@ -301,7 +385,8 @@ body {
    CARDS
 ========================== */
 
-.elemento {
+.elemento,
+.elemento-cpu {
   width: var(--tamanho-card);
   height: var(--tamanho-card);
 
@@ -311,12 +396,18 @@ body {
   border-radius: clamp(20px, 6vw, 28px);
 
   background: var(--cor-fundo-elemento);
+}
 
+.elemento {
   cursor: pointer;
 
+  /*
+    O card permanece com tamanho constante.
+    Apenas a imagem interna cresce na interação.
+  */
   transition:
-    transform 180ms ease,
-    background-color 180ms ease;
+    opacity 700ms ease,
+    background-color 250ms ease;
 }
 
 /* ==========================
@@ -329,7 +420,7 @@ body {
 
   object-fit: contain;
 
-  transition: transform 180ms ease;
+  transition: transform 250ms ease;
 }
 
 /* ==========================
@@ -339,22 +430,341 @@ body {
 .elemento:hover,
 .elemento:focus-visible {
   background: var(--cor-fundo-elemento-ativo);
-
-  transform: scale(1.06);
 }
 
 .elemento:hover .imagem-elemento,
 .elemento:focus-visible .imagem-elemento {
-  transform: scale(1.03);
+  transform: scale(1.06);
 }
 
-.elemento:active {
+.elemento:active .imagem-elemento {
   transform: scale(1.09);
 }
 
 .elemento:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.22);
   outline-offset: 4px;
+}
+
+/* ==========================
+   SAÍDA DAS OPÇÕES
+========================== */
+
+.elemento--saindo {
+  pointer-events: none;
+
+  opacity: 0;
+}
+
+.elemento--saindo .imagem-elemento {
+  transform: scale(0.8);
+}
+
+/* ==========================
+   CÓPIA DE MOVIMENTO
+========================== */
+
+.elemento-clone-movimento {
+  position: fixed;
+
+  z-index: 100;
+
+  margin: 0;
+
+  pointer-events: none;
+
+  transform-origin: center;
+}
+
+.elemento-clone-movimento .imagem-elemento {
+  transform: none !important;
+}
+
+/* ==========================
+   DUELO
+========================== */
+
+.duelo {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  grid-template-rows:
+    minmax(0, 1fr)
+    auto;
+
+  grid-template-areas:
+    "jogador cpu"
+    "acao acao";
+
+  align-items: center;
+
+  column-gap: clamp(0.7rem, 4vw, 1.25rem);
+  row-gap: clamp(0.9rem, 2.2vh, 1.2rem);
+}
+
+.slot-duelo {
+  display: grid;
+  place-items: center;
+
+  transform: none;
+}
+
+.slot-duelo--jogador {
+  grid-area: jogador;
+
+  justify-items: end;
+}
+
+.slot-duelo--cpu {
+  grid-area: cpu;
+
+  justify-items: start;
+}
+
+/* ==========================
+   ELEMENTO SELECIONADO
+========================== */
+
+.elemento--selecionado {
+  cursor: default;
+
+  pointer-events: none;
+
+  transform: none;
+}
+
+.elemento--selecionado .imagem-elemento {
+  transform: none;
+}
+
+/* ==========================
+   CPU
+========================== */
+
+.elemento-cpu {
+  opacity: 0;
+
+  transform: translateX(35px);
+
+  transition:
+    opacity 850ms ease,
+    transform 1050ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.elemento-cpu--visivel {
+  opacity: 1;
+
+  transform: translateX(0);
+}
+
+/* ==========================
+   PULO NORMAL
+========================== */
+
+.duelo--pulo .slot-duelo--jogador,
+.duelo--pulo .slot-duelo--cpu {
+  animation: pulo-duelo 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pulo-duelo {
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-22px);
+  }
+
+  65% {
+    transform: translateY(4px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
+   EMPATE
+========================== */
+
+.duelo--empate .slot-duelo--jogador,
+.duelo--empate .slot-duelo--cpu {
+  animation: pulo-empate 1100ms ease;
+}
+
+@keyframes pulo-empate {
+  0% {
+    transform: translateY(0);
+  }
+
+  20% {
+    transform: translateY(-30px);
+  }
+
+  38% {
+    transform: translateY(3px);
+  }
+
+  58% {
+    transform: translateY(-20px);
+  }
+
+  76% {
+    transform: translateY(2px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================
+   AÇÃO NO EMPATE
+========================== */
+
+.acao-empate {
+  grid-area: acao;
+
+  min-height: clamp(3.2rem, 7vh, 4.2rem);
+
+  display: grid;
+  place-items: center;
+}
+
+/* ==========================
+   SAÍDA DO DUELO
+========================== */
+
+.duelo--saindo {
+  opacity: 0;
+
+  transform: scale(0.9);
+
+  transition:
+    opacity 800ms ease,
+    transform 800ms ease;
+}
+
+/* ==========================
+   RESULTADO FINAL
+========================== */
+
+.resultado-final {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(0.8rem, 2vh, 1.2rem);
+
+  opacity: 0;
+
+  transform: scale(0.9);
+
+  transition:
+    opacity 900ms ease,
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.resultado-final--visivel {
+  opacity: 1;
+
+  transform: scale(1);
+}
+
+.resultado-visual {
+  width: 100%;
+  min-height: 0;
+
+  display: grid;
+  place-items: center;
+}
+
+.imagem-resultado {
+  width: min(100%, 420px);
+  max-height: min(46dvh, 430px);
+
+  object-fit: contain;
+}
+
+/* ==========================
+   JOGAR NOVAMENTE
+========================== */
+
+.jogar-novamente {
+  padding: clamp(0.7rem, 2vh, 0.95rem) clamp(1.25rem, 6vw, 1.8rem);
+
+  border: 1px solid rgba(201, 148, 63, 0.55);
+  border-radius: 999px;
+
+  background: rgba(201, 148, 63, 0.07);
+  color: var(--cor-dourada);
+
+  font-size: clamp(1.25rem, 5.8vw, 1.55rem);
+  font-weight: 700;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  visibility: hidden;
+  opacity: 0;
+
+  transform: translateY(10px) scale(0.96);
+
+  pointer-events: none;
+
+  transition:
+    color 250ms ease,
+    border-color 250ms ease,
+    background-color 250ms ease,
+    opacity 500ms ease,
+    transform 500ms ease;
+}
+
+.jogar-novamente--visivel {
+  visibility: visible;
+  opacity: 1;
+
+  transform: translateY(0) scale(1);
+
+  pointer-events: auto;
+
+  animation: pulsar-acao 1.8s ease-in-out infinite;
+}
+
+.jogar-novamente:hover,
+.jogar-novamente:focus-visible {
+  border-color: var(--cor-dourada-clara);
+
+  background: rgba(201, 148, 63, 0.13);
+  color: var(--cor-dourada-clara);
+}
+
+.jogar-novamente:focus-visible {
+  outline: 2px solid rgba(230, 187, 105, 0.4);
+  outline-offset: 4px;
+}
+
+@keyframes pulsar-acao {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(201, 148, 63, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(201, 148, 63, 0.2);
+  }
 }
 
 /* ==========================
@@ -367,7 +777,6 @@ body {
   width: 100%;
 
   display: grid;
-
   grid-template-columns: auto auto auto;
 
   align-items: center;
@@ -375,21 +784,10 @@ body {
 
   gap: clamp(2.2rem, 11vw, 4rem);
 
-  /*
-    Aumenta a área vertical do rodapé
-    sem alterar a posição dos elementos.
-  */
-  margin-top: clamp(0.6rem, 1.5vh, 1rem);
-
-  padding:
-    clamp(1rem, 2.5vh, 1.4rem)
-    0
-    clamp(1.1rem, 2.8vh, 1.6rem);
+  padding: clamp(1rem, 2.5vh, 1.4rem) 0 clamp(1.1rem, 2.8vh, 1.6rem);
 
   border-top: 1px solid var(--cor-linha);
 }
-
-/* VOCÊ E CPU */
 
 .placar-jogador,
 .placar-cpu {
@@ -405,13 +803,11 @@ body {
   text-transform: uppercase;
 }
 
-/* PONTUAÇÃO */
-
 .placar-pontos {
-  color: var(--cor-texto-secundario);
+  color: var(--cor-dourada-clara);
 
   font-size: clamp(1.4rem, 6vw, 1.7rem);
-  font-weight: 600;
+  font-weight: 700;
 
   letter-spacing: 0.14em;
 
@@ -419,7 +815,7 @@ body {
 }
 
 /* ==========================
-   TELAS COM POUCA ALTURA
+   TELAS BAIXAS
 ========================== */
 
 @media (max-height: 680px) {
@@ -427,30 +823,25 @@ body {
     --tamanho-card: clamp(110px, min(37vw, 18dvh), 150px);
   }
 
-  .jogo {
-    padding-top: 0.6rem;
-    padding-bottom: 0.4rem;
+  .imagem-resultado {
+    max-height: 38dvh;
   }
 
-  .cabecalho {
-    gap: 0.6rem;
+  .acao-empate {
+    min-height: 2.8rem;
   }
+}
 
-  .area-mensagem {
-    margin-top: 0.8rem;
-    margin-bottom: 0.4rem;
+/* ==========================
+   MOVIMENTO REDUZIDO
+========================== */
 
-    gap: 0.75rem;
-  }
-
-  .elementos {
-    transform: translateY(-5px);
-  }
-
-  .placar {
-    gap: clamp(1.5rem, 8vw, 2.5rem);
-
-    margin-top: 0.35rem;
-    padding-block: 0.45rem;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

@@ -16,12 +16,14 @@
     />
 
     <link rel="stylesheet" href="css/style.css" />
+
+    <script src="js/main.js" defer></script>
   </head>
 
   <body>
     <main class="jogo">
       <!-- ==========================
-           CABEÇALHO DO JOGO
+           CABEÇALHO
       =========================== -->
 
       <header class="cabecalho">
@@ -31,16 +33,18 @@
         </h1>
 
         <div class="linha-rodada">
-          <p class="rodada">Rodada 01</p>
+          <p class="rodada" id="rodada">Rodada 01</p>
         </div>
       </header>
 
       <!-- ==========================
-           MENSAGEM DO JOGO
+           STATUS DA PARTIDA
       =========================== -->
 
       <div class="area-mensagem">
-        <p class="mensagem-jogo">Escolha sua jogada:</p>
+        <p class="mensagem-jogo" id="mensagem-jogo" aria-live="polite">
+          Escolha sua jogada:
+        </p>
 
         <div class="separador" aria-hidden="true">
           <span class="losango"></span>
@@ -48,36 +52,97 @@
       </div>
 
       <!-- ==========================
-           OPÇÕES DE JOGADA
+           ARENA
       =========================== -->
 
-      <section class="elementos" aria-label="Escolha Pedra, Papel ou Tesoura">
-        <!-- Pedra -->
-        <button
-          class="elemento elemento--pedra"
-          type="button"
-          aria-label="Escolher Pedra"
-        >
-          <img class="imagem-elemento" src="assets/pedra.png" alt="" />
-        </button>
+      <section class="arena" id="arena" aria-label="Arena da partida">
+        <div class="campo-visual">
+          <!-- ==========================
+               SELEÇÃO INICIAL
+          =========================== -->
 
-        <!-- Papel -->
-        <button
-          class="elemento elemento--papel"
-          type="button"
-          aria-label="Escolher Papel"
-        >
-          <img class="imagem-elemento" src="assets/papel.png" alt="" />
-        </button>
+          <div
+            class="elementos"
+            id="elementos"
+            aria-label="Escolha Pedra, Papel ou Tesoura"
+          >
+            <button
+              class="elemento elemento--pedra"
+              type="button"
+              data-jogada="pedra"
+              aria-label="Escolher Pedra"
+            >
+              <img class="imagem-elemento" src="assets/pedra.png" alt="" />
+            </button>
 
-        <!-- Tesoura -->
-        <button
-          class="elemento elemento--tesoura"
-          type="button"
-          aria-label="Escolher Tesoura"
-        >
-          <img class="imagem-elemento" src="assets/tesoura.png" alt="" />
-        </button>
+            <button
+              class="elemento elemento--papel"
+              type="button"
+              data-jogada="papel"
+              aria-label="Escolher Papel"
+            >
+              <img class="imagem-elemento" src="assets/papel.png" alt="" />
+            </button>
+
+            <button
+              class="elemento elemento--tesoura"
+              type="button"
+              data-jogada="tesoura"
+              aria-label="Escolher Tesoura"
+            >
+              <img class="imagem-elemento" src="assets/tesoura.png" alt="" />
+            </button>
+          </div>
+
+          <!-- ==========================
+               DUELO
+          =========================== -->
+
+          <div class="duelo" id="duelo" hidden>
+            <div class="slot-duelo slot-duelo--jogador" id="slot-jogador"></div>
+
+            <div class="slot-duelo slot-duelo--cpu" id="slot-cpu">
+              <div class="elemento-cpu" id="elemento-cpu" aria-hidden="true">
+                <img class="imagem-elemento" id="imagem-cpu" src="" alt="" />
+              </div>
+            </div>
+
+            <div class="acao-empate">
+              <button
+                class="jogar-novamente jogar-novamente--empate"
+                id="jogar-novamente-empate"
+                type="button"
+                aria-hidden="true"
+              >
+                Jogar novamente
+              </button>
+            </div>
+          </div>
+
+          <!-- ==========================
+               RESULTADO FINAL
+          =========================== -->
+
+          <div class="resultado-final" id="resultado-final" hidden>
+            <figure class="resultado-visual">
+              <img
+                class="imagem-resultado"
+                id="imagem-resultado"
+                src=""
+                alt=""
+              />
+            </figure>
+
+            <button
+              class="jogar-novamente"
+              id="jogar-novamente"
+              type="button"
+              aria-hidden="true"
+            >
+              Jogar novamente
+            </button>
+          </div>
+        </div>
       </section>
 
       <!-- ==========================
@@ -87,7 +152,7 @@
       <footer class="placar" aria-label="Placar da partida">
         <span class="placar-jogador">Você</span>
 
-        <strong class="placar-pontos">0 : 0</strong>
+        <strong class="placar-pontos" id="placar-pontos"> 0 : 0 </strong>
 
         <span class="placar-cpu">CPU</span>
       </footer>
