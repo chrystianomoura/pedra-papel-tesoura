@@ -1,12 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Pedra, Papel e Tesoura</title>
 
@@ -14,135 +11,64 @@
   </head>
 
   <body>
-    <main class="asset-test">
-      <section
-        class="asset-group"
-        aria-label="Elementos de Pedra, Papel e Tesoura"
-      >
-        <!-- ==========================
-             PEDRA / RESULTADO 01
-        =========================== -->
-
-        <figure class="asset-card asset-card--rock">
-          <img
-            class="game-asset"
-            id="asset-rock"
-            src="assets/pedra.png"
-            alt="Pedra"
-          />
-
-          <figcaption id="caption-rock">
-            Pedra
-          </figcaption>
-        </figure>
-
-        <!-- ==========================
-             PAPEL / RESULTADO 02
-        =========================== -->
-
-        <figure class="asset-card asset-card--paper">
-          <img
-            class="game-asset"
-            id="asset-paper"
-            src="assets/papel.png"
-            alt="Papel"
-          />
-
-          <figcaption id="caption-paper">
-            Papel
-          </figcaption>
-        </figure>
-
-        <!-- ==========================
-             TESOURA / RESULTADO 03
-        =========================== -->
-
-        <figure class="asset-card asset-card--scissors">
-          <img
-            class="game-asset"
-            id="asset-scissors"
-            src="assets/tesoura.png"
-            alt="Tesoura"
-          />
-
-          <figcaption id="caption-scissors">
-            Tesoura
-          </figcaption>
-        </figure>
-      </section>
-
+    <main class="jogo">
       <!-- ==========================
-           CONTROLE DE TESTE
+           CABEÇALHO DO JOGO
       =========================== -->
 
-      <button
-        class="view-toggle"
-        id="view-toggle"
-        type="button"
-      >
-        Ver resultados
-      </button>
+      <header class="cabecalho">
+        <h1 class="titulo">
+          Pedra, Papel
+          <span>e Tesoura</span>
+        </h1>
+
+        <p class="rodada">Rodada 01</p>
+      </header>
+
+      <!-- ==========================
+           OPÇÕES DE JOGADA
+      =========================== -->
+
+      <section class="elementos" aria-label="Escolha Pedra, Papel ou Tesoura">
+        <!-- Pedra -->
+        <button
+          class="elemento elemento--pedra"
+          type="button"
+          aria-label="Escolher Pedra"
+        >
+          <img
+            class="imagem-elemento"
+            src="assets/pedra.png"
+            alt=""
+          />
+        </button>
+
+        <!-- Papel -->
+        <button
+          class="elemento elemento--papel"
+          type="button"
+          aria-label="Escolher Papel"
+        >
+          <img
+            class="imagem-elemento"
+            src="assets/papel.png"
+            alt=""
+          />
+        </button>
+
+        <!-- Tesoura -->
+        <button
+          class="elemento elemento--tesoura"
+          type="button"
+          aria-label="Escolher Tesoura"
+        >
+          <img
+            class="imagem-elemento"
+            src="assets/tesoura.png"
+            alt=""
+          />
+        </button>
+      </section>
     </main>
-
-    <script>
-      "use strict";
-
-      const toggleButton = document.querySelector("#view-toggle");
-
-      const rockImage = document.querySelector("#asset-rock");
-      const paperImage = document.querySelector("#asset-paper");
-      const scissorsImage = document.querySelector("#asset-scissors");
-
-      const rockCaption = document.querySelector("#caption-rock");
-      const paperCaption = document.querySelector("#caption-paper");
-      const scissorsCaption = document.querySelector("#caption-scissors");
-
-      let showingResults = false;
-
-      function showOriginalAssets() {
-        rockImage.src = "assets/pedra.png";
-        rockImage.alt = "Pedra";
-
-        paperImage.src = "assets/papel.png";
-        paperImage.alt = "Papel";
-
-        scissorsImage.src = "assets/tesoura.png";
-        scissorsImage.alt = "Tesoura";
-
-        rockCaption.textContent = "Pedra";
-        paperCaption.textContent = "Papel";
-        scissorsCaption.textContent = "Tesoura";
-
-        toggleButton.textContent = "Ver resultados";
-      }
-
-      function showResultAssets() {
-        rockImage.src = "assets/resultados/pedra-vence-tesoura.png";
-        rockImage.alt = "Pedra vence Tesoura";
-
-        paperImage.src = "assets/resultados/papel-vence-pedra.png";
-        paperImage.alt = "Papel vence Pedra";
-
-        scissorsImage.src = "assets/resultados/tesoura-vence-papel.png";
-        scissorsImage.alt = "Tesoura vence Papel";
-
-        rockCaption.textContent = "Pedra vence Tesoura";
-        paperCaption.textContent = "Papel vence Pedra";
-        scissorsCaption.textContent = "Tesoura vence Papel";
-
-        toggleButton.textContent = "Ver elementos";
-      }
-
-      toggleButton.addEventListener("click", () => {
-        showingResults = !showingResults;
-
-        if (showingResults) {
-          showResultAssets();
-          return;
-        }
-
-        showOriginalAssets();
-      });
-    </script>
   </body>
 </html>
